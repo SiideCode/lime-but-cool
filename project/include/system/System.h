@@ -46,7 +46,7 @@ namespace lime {
 			static int GetWindowsConsoleMode (int handleType);
 			#endif
 			static void OpenFile (const char* path);
-			static void OpenURL (const char* url, const char* target);
+			static int OpenURL (const char* url);
 			static bool SetAllowScreenTimeout (bool allow);
 			#if defined(HX_WINDOWS) && !defined (HX_WINRT)
 			static bool SetWindowsConsoleMode (int handleType, int mode);

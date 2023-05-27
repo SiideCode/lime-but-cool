@@ -60,6 +60,9 @@
 
 		<file name="src/ExternalInterface.cpp" />
 
+		<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/minimp3/include" />
+		<file name="src/media/containers/MP3.cpp" />
+
 		<section if="LIME_CAIRO">
 
 			<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/cairo/include" />
@@ -316,10 +319,14 @@
 		<file name="src/ui/TextEvent.cpp" />
 		<file name="src/ui/TouchEvent.cpp" />
 		<file name="src/ui/WindowEvent.cpp" />
+		<file name="src/system/IconEvent.cpp" if="windows"/>
 		<file name="src/utils/ArrayBufferView.cpp" />
 		<file name="src/utils/Bytes.cpp" />
 
 		<file name="src/hx/CFFIExt.cpp" />
+
+		<file name="src/system/notify/DesktopNotificationManagerCompat.cpp" if="winrt" />
+		<file name="src/system/notify/Notifications.cpp" unlsess="linux" />
 
 	</files>
 
@@ -333,6 +340,7 @@
 	<include name="lib/cairo/files.xml" />
 	<include name="lib/curl/files.xml" />
 	<include name="lib/efsw/files.xml" />
+	<include name="lib/minimp3/files.xml" />
 	<include name="lib/faudio/files.xml" if="LIME_FAUDIO" />
 	<include name="lib/freetype/files.xml" />
 	<include name="lib/harfbuzz/files.xml" />
@@ -368,6 +376,7 @@
 		<files id="native-toolkit-efsw" if="LIME_EFSW" />
 		<files id="native-toolkit-faudio" if="LIME_FAUDIO" />
 		<files id="native-toolkit-freetype" if="LIME_FREETYPE" />
+		<files id="native-toolkit-minimp3" />
 		<files id="native-toolkit-harfbuzz" if="LIME_HARFBUZZ" />
 		<files id="native-toolkit-jpeg" if="LIME_JPEG" />
 		<files id="native-toolkit-lzma" if="LIME_LZMA" />

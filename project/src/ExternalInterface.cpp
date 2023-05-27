@@ -1,3 +1,5 @@
+//TODO: Сделать регистрацию IconEvent Менеджера
+
 #ifndef STATIC_LINK
 #define IMPLEMENT_API
 #endif
@@ -18,6 +20,7 @@
 #include <graphics/RenderEvent.h>
 #include <media/containers/OGG.h>
 #include <media/containers/WAV.h>
+#include <media/containers/MP3.h>
 #include <media/AudioBuffer.h>
 #include <system/CFFIPointer.h>
 #include <system/Clipboard.h>
@@ -46,6 +49,11 @@
 #include <ui/WindowEvent.h>
 #include <utils/compress/LZMA.h>
 #include <utils/compress/Zlib.h>
+#include <system/Locale.h>
+#include "SDL_locale.h"
+#ifdef HX_WINDOWS
+#include <system/IconEvent.h>
+#endif
 #include <vm/NekoVM.h>
 
 #ifdef HX_WINDOWS
@@ -55,6 +63,8 @@
 
 #include <cstdlib>
 #include <cstring>
+
+//using namespace std;
 
 DEFINE_KIND (k_finalizer);
 
@@ -255,6 +265,14 @@ namespace lime {
 
 	}
 
+	#ifdef HX_WINDOWS
+	void lime_icon_event_manager_register (value callback, value eventObject)
+	{
+		IconEvent::callback = new ValuePointer (callback);
+		IconEvent::eventObject = new ValuePointer ((vobj*)eventObject);
+	}
+	#endif
+
 
 	int lime_application_exec (value application) {
 
@@ -346,17 +364,20 @@ namespace lime {
 		bytes.Set (data);
 		resource = Resource (&bytes);
 
-		if (WAV::Decode (&resource, &audioBuffer)) {
-
+		if (MP3::Decode (&resource, &audioBuffer))
+		{
 			return audioBuffer.Value (buffer);
+		}
 
+		if (WAV::Decode (&resource, &audioBuffer))
+		{
+			return audioBuffer.Value (buffer);
 		}
 
 		#ifdef LIME_OGG
-		if (OGG::Decode (&resource, &audioBuffer)) {
-
+		if (OGG::Decode (&resource, &audioBuffer))
+		{
 			return audioBuffer.Value (buffer);
-
 		}
 		#endif
 
@@ -368,6 +389,11 @@ namespace lime {
 	HL_PRIM AudioBuffer* HL_NAME(hl_audio_load_bytes) (Bytes* data, AudioBuffer* buffer) {
 
 		Resource resource = Resource (data);
+
+		if (MP3::Decode (&resource, buffer))
+		{
+			return buffer;
+		}
 
 		if (WAV::Decode (&resource, buffer)) {
 
@@ -396,6 +422,11 @@ namespace lime {
 
 		resource = Resource (val_string (data));
 
+		if (MP3::Decode (&resource, &audioBuffer))
+		{
+			return audioBuffer.Value (buffer);
+		}
+
 		if (WAV::Decode (&resource, &audioBuffer)) {
 
 			return audioBuffer.Value (buffer);
@@ -418,6 +449,11 @@ namespace lime {
 	HL_PRIM AudioBuffer* HL_NAME(hl_audio_load_file) (hl_vstring* data, AudioBuffer* buffer) {
 
 		Resource resource = Resource (data ? hl_to_utf8 ((const uchar*)data->bytes) : NULL);
+
+		if (MP3::Decode (&resource, buffer))
+		{
+			return buffer;
+		}
 
 		if (WAV::Decode (&resource, buffer)) {
 
@@ -2439,7 +2475,7 @@ namespace lime {
 
 	value lime_locale_get_system_locale () {
 
-		std::string* locale = Locale::GetSystemLocale ();
+		SDL_Locale *locale = Locale::GetSystemLocale();
 
 		if (!locale) {
 
@@ -2447,18 +2483,38 @@ namespace lime {
 
 		} else {
 
-			value result = alloc_string (locale->c_str ());
-			delete locale;
+			value arrayOne = alloc_array(strlen(locale->language));
+			value strng;
+			for (int i = 0; i<strlen(locale->language); i++)
+			{
+				//can't be null so uh
+				strng = alloc_string(locale->language);
+				val_array_set_i(arrayOne, i, strng);
+			}
+			value arrayTwo = alloc_array(strlen(locale->language));
+			for (int i = 0; i<strlen(locale->language); i++)
+			{
+				//i guess i'll still write nulls idk.
+				strng = alloc_string(locale->country);
+				val_array_set_i(arrayTwo, i, strng);
+			}
+			value result = alloc_array(2);
+
+			val_array_set_i(result, 0, arrayOne);
+			val_array_set_i(result, 1, arrayTwo);
+
+			delete [] locale;
 			return result;
 
 		}
 
 	}
 
-
-	HL_PRIM vbyte* HL_NAME(hl_locale_get_system_locale) () {
-
-		std::string* locale = Locale::GetSystemLocale ();
+	//i'm dying. TODO: Finish this or something.
+	HL_PRIM hl_varray* HL_NAME(hl_locale_get_system_locale) ()
+	{
+		/*
+		SDL_locale* locale = Locale::GetSystemLocale();
 
 		if (!locale) {
 
@@ -2466,16 +2522,20 @@ namespace lime {
 
 		} else {
 
-			int size = locale->size ();
-			char* _locale = (char*)malloc (size + 1);
-			strncpy (_locale, locale->c_str (), size);
-			_locale[size] = '\0';
-			delete locale;
+			hl_varray* mapthing = hl_alloc_array(&hlt_array, 2);
+			hl_varray* arrayOnee = hl_alloc_array(&hlt_array, _countof(locale))
 
-			return (vbyte*)_locale;
+			//int size = locale->size();
+			//char* _locale = (char*)malloc (size + 1);
+			//strncpy (_locale, locale->c_str (), size);
+			//_locale[size] = '\0';
+			//delete locale;
 
-		}
+			//return (vbyte*)_locale;
 
+		}*/
+
+		return nullptr;
 	}
 
 
@@ -3045,21 +3105,13 @@ namespace lime {
 	}
 
 
-	void lime_system_open_url (HxString url, HxString target) {
-
-		#ifdef IPHONE
-		System::OpenURL (url.c_str (), target.c_str ());
-		#endif
-
+	int lime_system_open_url (HxString url) {
+		return System::OpenURL (url.c_str ());
 	}
 
 
-	HL_PRIM void HL_NAME(hl_system_open_url) (vbyte* url, vbyte* target) {
-
-		#ifdef IPHONE
-		System::OpenURL ((char*)url, (char*)target);
-		#endif
-
+	HL_PRIM int  HL_NAME(hl_system_open_url) (vbyte* url) {
+		return System::OpenURL ((char*)url);
 	}
 
 
@@ -3146,6 +3198,17 @@ namespace lime {
 
 	}
 
+	int lime_window_flash(value window, int flashType)
+	{
+		Window* targetWindow = (Window*)val_data (window);
+		return targetWindow->Flash(flashType);
+	}
+
+	HL_PRIM int (hl_window_flash) (HL_CFFIPointer* window, int flashType)
+	{
+		Window* targetWindow = (Window*)window->ptr;
+		return targetWindow->Flash(flashType);
+	}
 
 	void lime_window_close (value window) {
 
@@ -3162,6 +3225,41 @@ namespace lime {
 
 	}
 
+	bool lime_window_create_tray_icon (value window, HxString resourcePath)
+	{
+		Window* targetWindow = (Window*)val_data(window);
+		return targetWindow->CreateTrayIcon(resourcePath.c_str());
+	}
+
+	HL_PRIM bool HL_NAME(hl_window_create_tray_icon) (HL_CFFIPointer* window, hl_vstring* resourcePath)
+	{
+		Window* targetWindow = (Window*)window->ptr;
+		return targetWindow->CreateTrayIcon(resourcePath ? (const char*)hl_to_utf8 ((const uchar*)resourcePath) : NULL);
+	}
+
+	bool lime_window_change_tray_icon (value window, HxString resourcePath)
+	{
+		Window* targetWindow = (Window*)val_data(window);
+		return targetWindow->ChangeTrayIcon(resourcePath.c_str());
+	}
+
+	HL_PRIM bool HL_NAME(hl_window_change_tray_icon) (HL_CFFIPointer* window, hl_vstring* resourcePath)
+	{
+		Window* targetWindow = (Window*)window->ptr;
+		return targetWindow->ChangeTrayIcon(resourcePath ? (const char*)hl_to_utf8 ((const uchar*)resourcePath) : NULL);
+	}
+
+	bool lime_window_change_tray_icon_tip (value window, HxString tip)
+	{
+		Window* targetWindow = (Window*)val_data(window);
+		return targetWindow->ChangeTrayIconTip(tip.c_str());
+	}
+
+	HL_PRIM bool HL_NAME(hl_window_change_tray_icon_tip) (HL_CFFIPointer* window, hl_vstring* tip)
+	{
+		Window* targetWindow = (Window*)window->ptr;
+		return targetWindow->ChangeTrayIconTip(tip ? (const char*)hl_to_utf8 ((const uchar*)tip) : NULL);
+	}
 
 	void lime_window_context_flip (value window) {
 
@@ -3535,6 +3633,29 @@ namespace lime {
 
 	}
 
+	bool lime_window_remove_tray_icon(value window)
+	{
+		Window* targetWindow = (Window*)val_data (window);
+		return targetWindow->RemoveTrayIcon();
+	}
+
+	HL_PRIM bool HL_NAME(hl_window_remove_tray_icon) (HL_CFFIPointer* window)
+	{
+		Window* targetWindow = (Window*)window->ptr;
+		return targetWindow->RemoveTrayIcon();
+	}
+
+	void lime_window_set_always_on_top(value window, bool enabled)
+	{
+		Window* targetWindow = (Window*)val_data (window);
+		targetWindow->SetAlwaysOnTop(enabled);
+	}
+
+	HL_PRIM void HL_NAME(hl_window_set_always_on_top) (HL_CFFIPointer* window, bool enabled)
+	{
+		Window* targetWindow = (Window*)window->ptr;
+		targetWindow->SetAlwaysOnTop(enabled);
+	}
 
 	bool lime_window_set_borderless (value window, bool borderless) {
 
@@ -3619,6 +3740,18 @@ namespace lime {
 		Window* targetWindow = (Window*)window->ptr;
 		targetWindow->SetIcon (buffer);
 
+	}
+
+	int lime_window_set_vsync (value window, bool enabled)
+	{
+		Window* targetWindow = (Window*)val_data(window);
+		return targetWindow->SetVSync(enabled);
+	}
+
+	HL_PRIM int HL_NAME(hl_window_set_vsync) (HL_CFFIPointer* window, bool enabled)
+	{
+		Window* targetWindow = (Window*)window->ptr;
+		return targetWindow->SetVSync(enabled);
 	}
 
 
@@ -3943,7 +4076,7 @@ namespace lime {
 	DEFINE_PRIME0 (lime_system_get_timer);
 	DEFINE_PRIME1 (lime_system_get_windows_console_mode);
 	DEFINE_PRIME1v (lime_system_open_file);
-	DEFINE_PRIME2v (lime_system_open_url);
+	DEFINE_PRIME1 (lime_system_open_url);
 	DEFINE_PRIME1 (lime_system_set_allow_screen_timeout);
 	DEFINE_PRIME2 (lime_system_set_windows_console_mode);
 	DEFINE_PRIME2v (lime_text_event_manager_register);
@@ -3955,6 +4088,7 @@ namespace lime {
 	DEFINE_PRIME1v (lime_window_context_make_current);
 	DEFINE_PRIME1v (lime_window_context_unlock);
 	DEFINE_PRIME5 (lime_window_create);
+	DEFINE_PRIME2 (lime_window_create_tray_icon);
 	DEFINE_PRIME2v (lime_window_event_manager_register);
 	DEFINE_PRIME1v (lime_window_focus);
 	DEFINE_PRIME1 (lime_window_get_context);
@@ -3975,6 +4109,9 @@ namespace lime {
 	DEFINE_PRIME2 (lime_window_set_borderless);
 	DEFINE_PRIME2v (lime_window_set_cursor);
 	DEFINE_PRIME2 (lime_window_set_display_mode);
+	DEFINE_PRIME2 (lime_window_change_tray_icon);
+	DEFINE_PRIME2 (lime_window_change_tray_icon_tip);
+	DEFINE_PRIME2 (lime_window_flash);
 	DEFINE_PRIME2 (lime_window_set_fullscreen);
 	DEFINE_PRIME2v (lime_window_set_icon);
 	DEFINE_PRIME2 (lime_window_set_maximized);
@@ -3985,8 +4122,14 @@ namespace lime {
 	DEFINE_PRIME2v (lime_window_set_text_input_rect);
 	DEFINE_PRIME2 (lime_window_set_title);
 	DEFINE_PRIME3v (lime_window_warp_mouse);
+	DEFINE_PRIME1 (lime_window_remove_tray_icon);
 	DEFINE_PRIME2 (lime_zlib_compress);
 	DEFINE_PRIME2 (lime_zlib_decompress);
+	DEFINE_PRIME2 (lime_window_set_vsync);
+	DEFINE_PRIME2v (lime_window_set_always_on_top);
+	#ifdef HX_WINDOWS
+	DEFINE_PRIME2v (lime_icon_event_manager_register);
+	#endif
 
 
 	#define _ENUM "?"
@@ -4127,7 +4270,7 @@ namespace lime {
 	DEFINE_HL_PRIM (_F64, hl_system_get_timer, _NO_ARG);
 	DEFINE_HL_PRIM (_I32, hl_system_get_windows_console_mode, _I32);
 	DEFINE_HL_PRIM (_VOID, hl_system_open_file, _STRING);
-	DEFINE_HL_PRIM (_VOID, hl_system_open_url, _STRING _STRING);
+	DEFINE_HL_PRIM (_VOID, hl_system_open_url, _STRING);
 	DEFINE_HL_PRIM (_BOOL, hl_system_set_allow_screen_timeout, _BOOL);
 	DEFINE_HL_PRIM (_BOOL, hl_system_set_windows_console_mode, _I32 _I32);
 	DEFINE_HL_PRIM (_VOID, hl_text_event_manager_register, _FUN (_VOID, _NO_ARG) _TTEXT_EVENT);
@@ -4171,6 +4314,13 @@ namespace lime {
 	DEFINE_HL_PRIM (_VOID, hl_window_warp_mouse, _TCFFIPOINTER _I32 _I32);
 	DEFINE_HL_PRIM (_TBYTES, hl_zlib_compress, _TBYTES _TBYTES);
 	DEFINE_HL_PRIM (_TBYTES, hl_zlib_decompress, _TBYTES _TBYTES);
+	DEFINE_HL_PRIM (_BOOL, hl_window_create_tray_icon, _TCFFIPOINTER _STRING);
+	DEFINE_HL_PRIM (_BOOL, hl_window_change_tray_icon, _TCFFIPOINTER _STRING);
+	DEFINE_HL_PRIM (_BOOL, hl_window_change_tray_icon_tip, _TCFFIPOINTER _STRING);
+	DEFINE_HL_PRIM (_BOOL, hl_window_remove_tray_icon, _TCFFIPOINTER);
+	//DEFINE_HL_PRIM (_I32, hl_window_flash, _TCFFIPOINTER _I32);
+	DEFINE_HL_PRIM (_I32, hl_window_set_vsync, _TCFFIPOINTER _BOOL);
+	DEFINE_HL_PRIM (_VOID, hl_window_set_always_on_top, _TCFFIPOINTER _BOOL);
 
 
 }

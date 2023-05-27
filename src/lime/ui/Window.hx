@@ -367,6 +367,25 @@ class Window
 		__backend.close();
 	}
 
+	public function createTrayIcon(resourcePath:String, ?tip:String):Array<Bool>
+	{
+		var lel:Array<Bool> = [];
+		lel.push(__backend.createTrayIcon(resourcePath));
+		if (tip != null)
+			lel.push(__backend.changeTrayIconTip(tip));
+		return lel;
+	}
+
+	public function changeTrayIcon(resourcePath:String):Bool
+	{
+		return __backend.changeTrayIcon(resourcePath);
+	}
+
+	public function changeTrayIconTip(tip:String):Bool
+	{
+		return __backend.changeTrayIconTip(tip);
+	}
+
 	public function focus():Void
 	{
 		__backend.focus();
@@ -391,6 +410,11 @@ class Window
 
 		__width = width;
 		__height = height;
+	}
+
+	public function removeTrayIcon():Bool
+	{
+		return __backend.removeTrayIcon();
 	}
 
 	public function setIcon(image:Image):Void

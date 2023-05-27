@@ -16,6 +16,9 @@
 #include <ui/TextEvent.h>
 #include <ui/TouchEvent.h>
 #include <ui/WindowEvent.h>
+#ifdef HX_WINDOWS
+#include <system/IconEvent.h>
+#endif
 #include "SDLWindow.h"
 
 
@@ -50,6 +53,9 @@ namespace lime {
 			void ProcessTextEvent (SDL_Event* event);
 			void ProcessTouchEvent (SDL_Event* event);
 			void ProcessWindowEvent (SDL_Event* event);
+			#ifdef HX_WINDOWS
+			void ProcessIconEvent (SDL_Event* event);
+			#endif
 			int WaitEvent (SDL_Event* event);
 
 			static void UpdateFrame ();
@@ -74,6 +80,9 @@ namespace lime {
 			TextEvent textEvent;
 			TouchEvent touchEvent;
 			WindowEvent windowEvent;
+			#ifdef HX_WINDOWS
+			IconEvent iconEvent;
+			#endif
 
 	};
 

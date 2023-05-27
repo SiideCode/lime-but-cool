@@ -24,6 +24,9 @@ namespace lime {
 			virtual void* ContextLock (bool useCFFIValue);
 			virtual void ContextMakeCurrent ();
 			virtual void ContextUnlock ();
+			virtual bool CreateTrayIcon (const char* resourcePath);
+			virtual bool ChangeTrayIcon (const char* resourcePath);
+			virtual bool ChangeTrayIconTip (const char* tip);
 			virtual void Focus ();
 			virtual void* GetContext ();
 			virtual const char* GetContextType ();
@@ -40,8 +43,11 @@ namespace lime {
 			virtual int GetY ();
 			virtual void Move (int x, int y);
 			virtual void ReadPixels (ImageBuffer *buffer, Rectangle *rect);
+			virtual bool RemoveTrayIcon ();
 			virtual void Resize (int width, int height);
-			virtual bool SetBorderless (bool borderless);
+			virtual void SetAlwaysOnTop (bool alwaysOnTop);
+			virtual int Flash(int flashType);
+			virtual bool SetBorderless(bool borderless);
 			virtual void SetCursor (Cursor cursor);
 			virtual void SetDisplayMode (DisplayMode* displayMode);
 			virtual bool SetFullscreen (bool fullscreen);
@@ -53,7 +59,8 @@ namespace lime {
 			virtual void SetTextInputEnabled (bool enabled);
 			virtual void SetTextInputRect (Rectangle *rect);
 			virtual const char* SetTitle (const char* title);
-			virtual void WarpMouse (int x, int y);
+			virtual int SetVSync(bool enabled);
+			virtual void WarpMouse(int x, int y);
 
 			SDL_Renderer* sdlRenderer;
 			SDL_Texture* sdlTexture;

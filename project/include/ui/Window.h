@@ -30,6 +30,9 @@ namespace lime {
 			virtual void* ContextLock (bool useCFFIValue) = 0;
 			virtual void ContextMakeCurrent () = 0;
 			virtual void ContextUnlock () = 0;
+			virtual bool CreateTrayIcon (const char* resourcePath) = 0;
+			virtual bool ChangeTrayIcon (const char* resourcePath) = 0;
+			virtual bool ChangeTrayIconTip (const char* tip) = 0;
 			virtual void Focus () = 0;
 			virtual void* GetContext () = 0;
 			virtual const char* GetContextType () = 0;
@@ -47,6 +50,9 @@ namespace lime {
 			virtual void Move (int x, int y) = 0;
 			virtual void ReadPixels (ImageBuffer *buffer, Rectangle *rect) = 0;
 			virtual void Resize (int width, int height) = 0;
+			virtual bool RemoveTrayIcon () = 0;
+			virtual void SetAlwaysOnTop (bool enable) = 0;
+			virtual int Flash(int flashType) = 0;
 			virtual bool SetBorderless (bool borderless) = 0;
 			virtual void SetCursor (Cursor cursor) = 0;
 			virtual void SetDisplayMode (DisplayMode* displayMode) = 0;
@@ -59,6 +65,7 @@ namespace lime {
 			virtual void SetTextInputEnabled (bool enable) = 0;
 			virtual void SetTextInputRect (Rectangle *rect) = 0;
 			virtual const char* SetTitle (const char* title) = 0;
+			virtual int SetVSync(bool enabled) = 0;
 			virtual void WarpMouse (int x, int y) = 0;
 
 			Application* currentApplication;
@@ -89,7 +96,13 @@ namespace lime {
 		WINDOW_FLAG_MINIMIZED = 0x00002000,
 		WINDOW_FLAG_MAXIMIZED = 0x00004000,
 		WINDOW_FLAG_ALWAYS_ON_TOP = 0x00008000,
-		WINDOW_FLAG_COLOR_DEPTH_32_BIT = 0x00010000
+		WINDOW_FLAG_COLOR_DEPTH_32_BIT = 0x00010000,
+		WINDOW_FLAG_SKIP_TASKBAR = 0x00010000,
+		#if defined(HX_LINUX)
+		WINDOW_FLAG_POPUP_MENU = 0x00080000,
+		WINDOW_FLAG_UTILITY = 0x00020000,
+		WINDOW_FLAG_TOOLTIP = 0x00040000
+		#endif
 
 	};
 

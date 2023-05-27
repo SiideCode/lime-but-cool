@@ -1,5 +1,7 @@
 package lime.media;
 
+import openfl.utils.ByteArray;
+import openfl.net.URLRequest;
 import haxe.io.Bytes;
 import haxe.io.Path;
 import lime._internal.backend.native.NativeCFFI;
@@ -9,7 +11,11 @@ import lime.app.Promise;
 import lime.media.openal.AL;
 import lime.media.openal.ALBuffer;
 import lime.media.vorbis.VorbisFile;
+#if !openfl
 import lime.net.HTTPRequest;
+#else
+import openfl.net.URLStream;
+#end
 import lime.utils.Log;
 import lime.utils.UInt8Array;
 #if lime_howlerjs
@@ -37,6 +43,7 @@ class AudioBuffer
 	public var channels:Int;
 	public var data:UInt8Array;
 	public var sampleRate:Int;
+	public var bitrate:Int;
 	public var src(get, set):Dynamic;
 
 	@:noCompletion private var __srcAudio:#if (js && html5) Audio #else Dynamic #end;
@@ -104,6 +111,10 @@ class AudioBuffer
 			audioBuffer.channels = data.channels;
 			audioBuffer.data = new UInt8Array(@:privateAccess new Bytes(data.data.length, data.data.b));
 			audioBuffer.sampleRate = data.sampleRate;
+			if (audioBuffer.bitrate != null)
+				audioBuffer.bitrate = data.bitrate;
+			elses
+				audioBuffer.bitrate = 0;
 			return audioBuffer;
 		}
 		#end
@@ -290,9 +301,8 @@ class AudioBuffer
 
 		return promise.future;
 		#else
-		// TODO: Streaming
-
-		var request = new HTTPRequest<AudioBuffer>();
+        #if !openfl
+        var request = new HTTPRequest<AudioBuffer>();
 		return request.load(path).then(function(buffer)
 		{
 			if (buffer != null)
@@ -304,6 +314,30 @@ class AudioBuffer
 				return cast Future.withError("");
 			}
 		});
+		#else
+
+		var promise = new Promise<AudioBuffer>();
+        var request = new URLStream();
+		var byteArray = new ByteArray();
+
+		//Может не работать
+		request.addEventListener('progress', function(event)
+		{
+			request.readBytes(byteArray, 0, request.bytesAvailable);
+			return fromBytes(byteArray);
+		});
+
+		//Должно работать
+        /*request.addEventListener('complete', function(event)
+        {
+			request.readBytes(bytes, 0, request.bytesAvailable);
+			return fromBytes(bytes);
+        });*/
+
+        request.load(new URLRequest(path));
+
+        return null;
+        #end
 		#end
 	}
 

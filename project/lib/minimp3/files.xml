@@ -1,0 +1,12 @@
+<xml>
+
+	<files id="native-toolkit-minimp3" >
+
+		<!--it's TWO FUCKING HEADERS, i'm impressed-->
+		<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/minimp3/include" />
+		<!--<depend value="-${NATIVE_TOOLKIT_PATH}/minimp3/include/minimp3.h" />
+		<depend value="-${NATIVE_TOOLKIT_PATH}/minimp3/include/minimp3_ex.h" />-->
+
+	</files>
+
+</xml>

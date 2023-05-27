@@ -267,9 +267,11 @@ class NativeCFFI
 
 	@:cffi private static function lime_system_get_timer():Float;
 
+	@:cffi private static function lime_locale_get_system_locale():Dynamic;
+
 	@:cffi private static function lime_system_open_file(path:String):Void;
 
-	@:cffi private static function lime_system_open_url(url:String, target:String):Void;
+	@:cffi private static function lime_system_open_url(url:String):Int;
 
 	@:cffi private static function lime_text_event_manager_register(callback:Dynamic, eventObject:Dynamic):Void;
 
@@ -289,7 +291,19 @@ class NativeCFFI
 
 	@:cffi private static function lime_window_create(application:Dynamic, width:Int, height:Int, flags:Int, title:String):Dynamic;
 
+	@:cffi private static function lime_window_create_tray_icon(handle:Dynamic, resourcePath:String):Bool;
+
+	@:cffi private static function lime_window_change_tray_icon(handle:Dynamic, resourcePath:String):Bool;
+
+	@:cffi private static function lime_window_change_tray_icon(handle:Dynamic, tip:String):Bool
+
 	@:cffi private static function lime_window_focus(handle:Dynamic):Void;
+
+	@:cffi private static function lime_window_flash(handle:Dynamic, flashType:Int):Int;
+
+	@:cffi private static function lime_window_set_always_on_top(handle:Dynamic, enable:Bool):Void;
+
+	@:cffi private static function lime_window_set_vsync(handle:Dynamic, enable:Bool):Int;
 
 	@:cffi private static function lime_window_get_context(handle:Dynamic):Float;
 
@@ -318,6 +332,8 @@ class NativeCFFI
 	@:cffi private static function lime_window_move(handle:Dynamic, x:Int, y:Int):Void;
 
 	@:cffi private static function lime_window_read_pixels(handle:Dynamic, rect:Dynamic, imageBuffer:Dynamic):Dynamic;
+
+	@:cffi private static function lime_window_remove_tray_icon(handle:Dynamic):Bool;
 
 	@:cffi private static function lime_window_resize(handle:Dynamic, width:Int, height:Int):Void;
 
@@ -534,8 +550,9 @@ class NativeCFFI
 	private static var lime_system_get_platform_version = new cpp.Callable<Void->cpp.Object>(cpp.Prime._loadPrime("lime", "lime_system_get_platform_version",
 		"o", false));
 	private static var lime_system_get_timer = new cpp.Callable<Void->Float>(cpp.Prime._loadPrime("lime", "lime_system_get_timer", "d", false));
+	private static var lime_locale_get_system_locale = new cpp.Callable<Void->cpp.Object>(cpp.Prime._loadPrime("lime", "lime_locale_get_system_locale", "o", false));
 	private static var lime_system_open_file = new cpp.Callable<String->cpp.Void>(cpp.Prime._loadPrime("lime", "lime_system_open_file", "sv", false));
-	private static var lime_system_open_url = new cpp.Callable<String->String->cpp.Void>(cpp.Prime._loadPrime("lime", "lime_system_open_url", "ssv", false));
+	private static var lime_system_open_url = new cpp.Callable<String->Int>(cpp.Prime._loadPrime("lime", "lime_system_open_url", "si", false));
 	private static var lime_text_event_manager_register = new cpp.Callable<cpp.Object->cpp.Object->cpp.Void>(cpp.Prime._loadPrime("lime",
 		"lime_text_event_manager_register", "oov", false));
 	private static var lime_touch_event_manager_register = new cpp.Callable<cpp.Object->cpp.Object->cpp.Void>(cpp.Prime._loadPrime("lime",
@@ -553,7 +570,13 @@ class NativeCFFI
 		false));
 	private static var lime_window_create = new cpp.Callable<cpp.Object->Int->Int->Int->String->cpp.Object>(cpp.Prime._loadPrime("lime", "lime_window_create",
 		"oiiiso", false));
+	private static var lime_window_create_tray_icon = new cpp.Callable<cpp.Object->String->Bool>(cpp.Prime._loadPrime("lime", "lime_window_create_tray_icon", "osb", false));
+	private static var lime_window_change_tray_icon = new cpp.Callable<cpp.Object->String->Bool>(cpp.Prime._loadPrime("lime", "lime_window_change_tray_icon", "osb", false));
+	private static var lime_window_change_tray_icon_tip = new cpp.Callable<cpp.Object->String->Bool>(cpp.Prime._loadPrime("lime", "lime_window_change_tray_icon_tip", "osb", false));
 	private static var lime_window_focus = new cpp.Callable<cpp.Object->cpp.Void>(cpp.Prime._loadPrime("lime", "lime_window_focus", "ov", false));
+	private static var lime_window_flash = new cpp.Callable<cpp.Object->Int->Int>(cpp.Prime._loadPrime("lime", "lime_window_flash", "oii", false));
+	private static var lime_window_set_always_on_top = new cpp.Callable<cpp.Object->Bool->cpp.Void>(cpp.Prime._loadPrime("lime", "lime_window_set_always_on_top", "obv", false));
+	private static var lime_window_set_vsync = new cpp.Callable<cpp.Object->Bool->Int>(cpp.Prime._loadPrime("lime", "lime_window_set_vsync", "obi", false));
 	private static var lime_window_get_context = new cpp.Callable<cpp.Object->Float>(cpp.Prime._loadPrime("lime", "lime_window_get_context", "od", false));
 	private static var lime_window_get_context_type = new cpp.Callable<cpp.Object->cpp.Object>(cpp.Prime._loadPrime("lime", "lime_window_get_context_type",
 		"oo", false));
@@ -575,6 +598,7 @@ class NativeCFFI
 		"lime_window_read_pixels", "oooo", false));
 	private static var lime_window_resize = new cpp.Callable<cpp.Object->Int->Int->cpp.Void>(cpp.Prime._loadPrime("lime", "lime_window_resize", "oiiv",
 		false));
+	private static var lime_window_remove_tray_icon = new cpp.Callable<cpp.Object->Bool>(cpp.Prime._loadPrime("lime", "lime_window_remove_tray_icon", "ob", false));
 	private static var lime_window_set_borderless = new cpp.Callable<cpp.Object->Bool->Bool>(cpp.Prime._loadPrime("lime", "lime_window_set_borderless", "obb",
 		false));
 	private static var lime_window_set_cursor = new cpp.Callable<cpp.Object->Int->cpp.Void>(cpp.Prime._loadPrime("lime", "lime_window_set_cursor", "oiv",
@@ -714,8 +738,9 @@ class NativeCFFI
 	private static var lime_system_get_platform_name = CFFI.load("lime", "lime_system_get_platform_name", 0);
 	private static var lime_system_get_platform_version = CFFI.load("lime", "lime_system_get_platform_version", 0);
 	private static var lime_system_get_timer = CFFI.load("lime", "lime_system_get_timer", 0);
+	private static var lime_locale_get_system_locale = CFFI.load("lime", "lime_locale_get_system_locale", 0);
 	private static var lime_system_open_file = CFFI.load("lime", "lime_system_open_file", 1);
-	private static var lime_system_open_url = CFFI.load("lime", "lime_system_open_url", 2);
+	private static var lime_system_open_url = CFFI.load("lime", "lime_system_open_url", 1);
 	private static var lime_text_event_manager_register = CFFI.load("lime", "lime_text_event_manager_register", 2);
 	private static var lime_touch_event_manager_register = CFFI.load("lime", "lime_touch_event_manager_register", 2);
 	private static var lime_window_alert = CFFI.load("lime", "lime_window_alert", 3);
@@ -725,7 +750,13 @@ class NativeCFFI
 	private static var lime_window_context_make_current = CFFI.load("lime", "lime_window_context_make_current", 1);
 	private static var lime_window_context_unlock = CFFI.load("lime", "lime_window_context_unlock", 1);
 	private static var lime_window_create = CFFI.load("lime", "lime_window_create", 5);
+	private static var lime_window_create_tray_icon = CFFI.load("lime", "lime_window_create_tray_icon", 2);
+	private static var lime_window_change_tray_icon = CFFI.load("lime", "lime_window_change_tray_icon", 2);
+	private static var lime_window_change_tray_icon_tip = CFFI.load("lime", "lime_window_change_tray_icon_tip", 2);
 	private static var lime_window_focus = CFFI.load("lime", "lime_window_focus", 1);
+	private static var lime_window_flash = CFFI.load("lime", "lime_window_flash", 2);
+	private static var lime_window_set_always_on_top = CFFI.load("lime", "lime_window_set_always_on_top", 2);
+	private static var lime_window_set_vsync = CFFI.load("lime", "lime_window_set_vsync", 2);
 	private static var lime_window_get_context = CFFI.load("lime", "lime_window_get_context", 1);
 	private static var lime_window_get_context_type = CFFI.load("lime", "lime_window_get_context_type", 1);
 	private static var lime_window_get_display = CFFI.load("lime", "lime_window_get_display", 1);
@@ -741,6 +772,7 @@ class NativeCFFI
 	private static var lime_window_move = CFFI.load("lime", "lime_window_move", 3);
 	private static var lime_window_read_pixels = CFFI.load("lime", "lime_window_read_pixels", 3);
 	private static var lime_window_resize = CFFI.load("lime", "lime_window_resize", 3);
+	private static var lime_window_remove_tray_icon = CFFI.load("lime", "lime_window_remove_tray_icon", 1);
 	private static var lime_window_set_borderless = CFFI.load("lime", "lime_window_set_borderless", 2);
 	private static var lime_window_set_cursor = CFFI.load("lime", "lime_window_set_cursor", 2);
 	private static var lime_window_set_display_mode = CFFI.load("lime", "lime_window_set_display_mode", 2);
@@ -1212,7 +1244,9 @@ class NativeCFFI
 
 	@:hlNative("lime", "hl_system_open_file") private static function lime_system_open_file(path:String):Void {}
 
-	@:hlNative("lime", "hl_system_open_url") private static function lime_system_open_url(url:String, target:String):Void {}
+	//@:hlNative ()
+
+	@:hlNative("lime", "hl_system_open_url") private static function lime_system_open_url(url:String):Int {}
 
 	@:hlNative("lime", "hl_text_event_manager_register") private static function lime_text_event_manager_register(callback:Void->Void,
 		eventObject:TextEventInfo):Void {}
@@ -1241,7 +1275,19 @@ class NativeCFFI
 		return null;
 	}
 
+	@:hlNative("lime", "hl_window_create_tray_icon") private static function lime_window_create_tray_icon(handle:CFFIPointer, resourcePath:String):Bool {}
+
+	@:hlNative("lime", "hl_window_change_tray_icon") private static function lime_window_change_tray_icon(handle:CFFIPointer, resourcePath:String):Bool {}
+
+	@:hlNative("lime", "hl_window_change_tray_icon_tip") private static function lime_window_change_tray_icon_tip(handle:CFFIPointer, tip:String):Bool {}
+
 	@:hlNative("lime", "hl_window_focus") private static function lime_window_focus(handle:CFFIPointer):Void {}
+
+	//@:hlNative("lime", "hl_window_flash") private static function lime_window_flash(handle:CFFIPointer, flashType:Int):Int {}
+
+	@:hlNative("lime", "hl_window_set_always_on_top") private static function lime_window_set_always_on_top(handle:CFFIPointer, enable:Bool):Void {}
+
+	@:hlNative("lime", "hl_window_set_vsync") private static function lime_window_set_vsync(handle:CFFIPointer, enabled:Bool):Int {}
 
 	@:hlNative("lime", "hl_window_get_context") private static function lime_window_get_context(handle:CFFIPointer):Float
 	{
@@ -1309,6 +1355,8 @@ class NativeCFFI
 	}
 
 	@:hlNative("lime", "hl_window_resize") private static function lime_window_resize(handle:CFFIPointer, width:Int, height:Int):Void {}
+
+	@:hlNative("lime", "hl_window_remove_tray_icon") private static function lime_window_remove_tray_icon(handle:CFFIPointer):Bool {}
 
 	@:hlNative("lime", "hl_window_set_borderless") private static function lime_window_set_borderless(handle:CFFIPointer, borderless:Bool):Bool
 	{

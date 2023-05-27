@@ -3,6 +3,12 @@
 #include "SDLJoystick.h"
 #include <system/System.h>
 
+#ifdef HX_WINDOWS
+#include "SDL_syswm.h"
+#include "Windows.h"
+#include "windowsx.h"
+#endif
+
 #ifdef HX_MACOS
 #include <CoreFoundation/CoreFoundation.h>
 #endif
@@ -64,6 +70,9 @@ namespace lime {
 		TextEvent textEvent;
 		TouchEvent touchEvent;
 		WindowEvent windowEvent;
+		#ifdef HX_WINDOWS
+		IconEvent iconEvent;
+		#endif
 
 		SDL_EventState (SDL_DROPFILE, SDL_ENABLE);
 		SDLJoystick::Init ();
@@ -252,6 +261,12 @@ namespace lime {
 				ProcessTextEvent (event);
 				break;
 
+			case SDL_SYSWMEVENT:
+
+				#ifdef HX_WINDOWS
+				ProcessIconEvent (event);
+				#endif
+
 			case SDL_WINDOWEVENT:
 
 				switch (event->window.event) {
@@ -311,7 +326,6 @@ namespace lime {
 
 						}
 						break;
-
 				}
 
 				break;
@@ -335,17 +349,39 @@ namespace lime {
 	}
 
 
-	void SDLApplication::ProcessClipboardEvent (SDL_Event* event) {
-
-		if (ClipboardEvent::callback) {
-
+	void SDLApplication::ProcessClipboardEvent (SDL_Event* event)
+	{
+		if (ClipboardEvent::callback)
+		{
 			clipboardEvent.type = CLIPBOARD_UPDATE;
 
 			ClipboardEvent::Dispatch (&clipboardEvent);
-
 		}
-
 	}
+
+	#ifdef HX_WINDOWS
+	void SDLApplication::ProcessIconEvent (SDL_Event* event)
+	{
+		if (IconEvent::callback)
+		{
+			if (event->syswm.msg->msg.win.msg == WM_CONTEXTMENU)
+        	{
+				SDL_SysWMinfo inf;
+				if (SDL_GetWindowWMInfo(SDL_GetWindowFromID(event->window.windowID), &inf))
+				{
+					if (LOWORD(event->syswm.msg->msg.win.wParam) == (WORD) inf.info.win.window)
+					{
+						//handle this shit to the application or something so it can create a window.
+						iconEvent.type = CONTEXTMENUOPEN;
+						iconEvent.xClick = GET_X_LPARAM(event->syswm.msg->msg.win.lParam);
+						iconEvent.yClick = GET_Y_LPARAM(event->syswm.msg->msg.win.lParam);
+						IconEvent::Dispatch (&iconEvent);
+					}
+				}
+			}
+		}
+	}
+	#endif
 
 
 	void SDLApplication::ProcessDropEvent (SDL_Event* event) {

@@ -290,6 +290,11 @@ namespace lime {
 
 	}
 
+	//NOT PLATFORM SPECIFIC ANYMORE!! YAHOOOOOOOO!
+	int System::OpenURL (const char *url)
+	{
+		return SDL_OpenURL(url);
+	}
 
 	void* System::GetDisplay (bool useCFFIValue, int id) {
 

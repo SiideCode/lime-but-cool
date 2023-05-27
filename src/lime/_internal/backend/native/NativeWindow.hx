@@ -27,6 +27,14 @@ import lime.utils.UInt8Array;
 @:fileXml('tags="haxe,release"')
 @:noDebug
 #end
+
+enum abstract FlashType(Int)
+{
+	var FLASH_CANCEL = 0;
+	var FLASH_BREIFLY = 1;
+	var FLASH_UNTIL_FOCUSED = 2;
+}
+
 @:access(lime._internal.backend.native.NativeCFFI)
 @:access(lime._internal.backend.native.NativeOpenGLRenderContext)
 @:access(lime.app.Application)
@@ -40,6 +48,7 @@ class NativeWindow
 {
 	public var handle:Dynamic;
 
+	private var hasTrayIcon:Bool;
 	private var closing:Bool;
 	private var cursor:MouseCursor;
 	private var displayMode:DisplayMode;
@@ -86,6 +95,7 @@ class NativeWindow
 		if (Reflect.hasField(attributes, "maximized") && attributes.maximized) flags |= cast WindowFlags.WINDOW_FLAG_MAXIMIZED;
 		if (Reflect.hasField(attributes, "minimized") && attributes.minimized) flags |= cast WindowFlags.WINDOW_FLAG_MINIMIZED;
 		if (Reflect.hasField(attributes, "resizable") && attributes.resizable) flags |= cast WindowFlags.WINDOW_FLAG_RESIZABLE;
+		if (Reflect.hasField(attributes, "skipTaskBar") && attributes.skipTaskBar) flags |= cast WindowFlags.WINDOW_FLAG_SKIP_TASK_BAR;
 
 		if (contextAttributes.antialiasing >= 4)
 		{
@@ -188,6 +198,30 @@ class NativeWindow
 		}
 	}
 
+	public function flash(flashType:FlashType):Int
+	{
+		#if (!macro && lime_cffi)
+		if (handle != null)
+		{
+			var mamar:Int;
+			switch (flashType)
+			{
+				case FLASH_CANCEL:
+					mamar = 0;
+				case FLASH_BREIFLY:
+					mamar = 1;
+				case FLASH_UNTIL_FOCUSED:
+					mamar = 2;
+			}
+			return NativeCFFI.lime_window_flash(handle, mamar);
+		}
+		else
+			return -1;
+		#else
+		return -1;
+		#end
+	}
+
 	public function close():Void
 	{
 		if (!closing)
@@ -212,6 +246,21 @@ class NativeWindow
 		}
 	}
 
+	public function createTrayIcon(resourcePath:String):Bool
+	{
+		if (handle == null || hasTrayIcon)
+			return false
+		else
+		{
+			#if (!macro && lime_cffi && windows)
+			hasTrayIcon = true;
+			return NativeCFFI.lime_window_create_tray_icon(handle, resourcePath);
+			#else
+			return false;
+			#end
+		}
+	}
+
 	public function contextFlip():Void
 	{
 		#if (!macro && lime_cffi)
@@ -228,6 +277,34 @@ class NativeWindow
 
 		NativeCFFI.lime_window_context_flip(handle);
 		#end
+	}
+
+	public function changeTrayIcon(resourcePath:String):Bool
+	{
+		if (handle == null || !hasTrayIcon)
+			return false
+		else
+		{
+			#if (!macro && lime_cffi)
+			return NativeCFFI.lime_window_change_tray_icon(handle, resourcePath);
+			#else
+			return false;
+			#end
+		}
+	}
+
+	public function changeTrayIconTip(tip:String):Bool
+	{
+		if (handle == null || !hasTrayIcon)
+			return false
+		else
+		{
+			#if (!macro && lime_cffi)
+			return NativeCFFI.lime_window_change_tray_icon_tip(handle, tip);
+			#else
+			return false;
+			#end
+		}
 	}
 
 	public function focus():Void
@@ -445,6 +522,46 @@ class NativeWindow
 		{
 			#if (!macro && lime_cffi)
 			NativeCFFI.lime_window_resize(handle, width, height);
+			#end
+		}
+	}
+
+	public function removeTrayIcon():Bool
+	{
+		if (handle == null || !hasTrayIcon)
+			return false
+		else
+		{
+			#if (!macro && lime_cffi)
+			hasTrayIcon = false;
+			return NativeCFFI.lime_window_remove_tray_icon(handle);
+			#else
+			return false;
+			#end
+		}
+	}
+
+	public function setVSync(enable:Bool):Int
+	{
+		if (handle == null)
+			return -1;
+		else
+		{
+			#if (!macro && lime_cffi)
+			hasTrayIcon = false;
+			return NativeCFFI.lime_window_set_vsync(handle, enable);
+			#else
+			return -1;
+			#end
+		}
+	}
+
+	public function setAlwaysOnTop(enable:Bool):Void
+	{
+		if (handle != null)
+		{
+			#if (!macro && lime_cffi)
+			NativeCFFI.lime_window_set_always_on_top(handle, enable);
 			#end
 		}
 	}
@@ -701,4 +818,5 @@ class NativeWindow
 	var WINDOW_FLAG_MAXIMIZED = 0x00004000;
 	var WINDOW_FLAG_ALWAYS_ON_TOP = 0x00008000;
 	var WINDOW_FLAG_COLOR_DEPTH_32_BIT = 0x00010000;
+	var WINDOW_FLAG_SKIP_TASK_BAR = 0x00010000;
 }

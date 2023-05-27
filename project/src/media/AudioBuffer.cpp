@@ -8,6 +8,7 @@ namespace lime {
 	static int id_channels;
 	static int id_data;
 	static int id_sampleRate;
+	static int id_bitrate;
 	static bool init = false;
 
 
@@ -19,6 +20,7 @@ namespace lime {
 			id_channels = val_id ("channels");
 			id_data = val_id ("data");
 			id_sampleRate = val_id ("sampleRate");
+			id_bitrate = val_id ("bitrate");
 			init = true;
 
 		}
@@ -29,6 +31,7 @@ namespace lime {
 			channels = val_int (val_field (audioBuffer, id_channels));
 			data = new ArrayBufferView (val_field (audioBuffer, id_data));
 			sampleRate = val_int (val_field (audioBuffer, id_sampleRate));
+			bitrate = val_int (val_field (audioBuffer, id_bitrate));
 
 		} else {
 
@@ -36,6 +39,7 @@ namespace lime {
 			channels = 0;
 			// data = new ArrayBufferView ();
 			sampleRate = 0;
+			bitrate = 0;
 
 		}
 
@@ -70,6 +74,7 @@ namespace lime {
 			id_channels = val_id ("channels");
 			id_data = val_id ("data");
 			id_sampleRate = val_id ("sampleRate");
+			id_bitrate = val_id ("bitrate");
 			init = true;
 
 		}
@@ -78,6 +83,7 @@ namespace lime {
 		alloc_field (audioBuffer, id_channels, alloc_int (channels));
 		alloc_field (audioBuffer, id_data, data ? data->Value (val_field (audioBuffer, id_data)) : alloc_null ());
 		alloc_field (audioBuffer, id_sampleRate, alloc_int (sampleRate));
+		alloc_field (audioBuffer, id_bitrate, alloc_int (bitrate));
 		return audioBuffer;
 
 	}

@@ -10,9 +10,24 @@
 #undef CreateWindow
 #endif
 
+#ifdef HX_WINRT
+#include "wrl.h"
+//#include "appmodel.h"
+//#include "wrl\wrappers\corewrappers.h"
+
+//using namespace ABI::Windows::Data::Xml::Dom;
+using namespace Microsoft::WRL;
+using namespace Microsoft::WRL::Wrappers;
+#endif
+
+//using namespace std;
+
 
 namespace lime {
 
+	#ifdef HX_WINDOWS
+	NOTIFYICONDATAW tIcon;
+	#endif
 
 	static Cursor currentCursor = DEFAULT;
 
@@ -51,6 +66,16 @@ namespace lime {
 		if (flags & WINDOW_FLAG_HIDDEN) sdlWindowFlags |= SDL_WINDOW_HIDDEN;
 		if (flags & WINDOW_FLAG_MINIMIZED) sdlWindowFlags |= SDL_WINDOW_MINIMIZED;
 		if (flags & WINDOW_FLAG_MAXIMIZED) sdlWindowFlags |= SDL_WINDOW_MAXIMIZED;
+		//documentation lied about SDL_WINDOW_SKIP_TASKBAR.
+		//according to SDL_windowswindow.c code it does work with win32 windows.
+		if (flags & WINDOW_FLAG_SKIP_TASKBAR) sdlWindowFlags |= SDL_WINDOW_SKIP_TASKBAR;
+
+		//X11 is a linux-only window system lol.
+		#ifdef HX_LINUX
+		if (flags & WINDOW_FLAG_POPUP_MENU) sdlWindowFlags |= SDL_WINDOW_POPUP_MENU;
+		if (flags & WINDOW_FLAG_UTILITY) sdlWindowFlags |= SDL_WINDOW_UTILITY;
+		if (flags & WINDOW_FLAG_TOOLTIP) sdlWindowFlags |= SDL_WINDOW_TOOLTIP;
+		#endif
 
 		#ifndef EMSCRIPTEN
 		if (flags & WINDOW_FLAG_ALWAYS_ON_TOP) sdlWindowFlags |= SDL_WINDOW_ALWAYS_ON_TOP;
@@ -1049,6 +1074,97 @@ namespace lime {
 
 	}
 
+	bool SDLWindow::CreateTrayIcon (const char* resourcePath)
+	{
+		#if defined (HX_WINDOWS)
+		SDL_SysWMinfo wminfo;
+
+		if(SDL_GetWindowWMInfo(sdlWindow, &wminfo))
+		{
+			//tIcon.uCallbackMessage = WM_USER + 1;
+			tIcon.uFlags = NIF_ICON | NIF_TIP | NIF_MESSAGE;
+			if (resourcePath = "default")
+			{
+				HINSTANCE handle = GetModuleHandle (nullptr);
+				tIcon.hIcon = (HICON) LoadImage(handle, MAKEINTRESOURCE(1), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR);
+			}
+			else
+			{
+				size_t realsiz = strlen(resourcePath) + 1;
+
+				wchar_t* WIDErespath = new wchar_t[realsiz];
+
+				// Convert char* to wchar_t*
+				size_t convertedChars = 0;
+				mbstowcs_s(&convertedChars, WIDErespath, realsiz, resourcePath, _TRUNCATE);
+
+				tIcon.hIcon = (HICON) LoadImageW(NULL, WIDErespath, IMAGE_ICON, 16, 16, LR_LOADFROMFILE | LR_DEFAULTCOLOR);
+
+				delete[] WIDErespath;
+			}
+			tIcon.cbSize = sizeof(tIcon);
+			tIcon.hWnd = wminfo.info.win.window;
+			tIcon.uVersion = NOTIFYICON_VERSION_4;
+			wcscpy_s((&tIcon.szTip)[128], L"Lime Application");
+		}
+
+		return Shell_NotifyIconW(NIM_ADD, &tIcon);
+		#endif
+	}
+
+	bool SDLWindow::ChangeTrayIcon (const char* resourcePath)
+	{
+
+		#if defined (HX_WINDOWS)
+		size_t realsiz = strlen(resourcePath) + 1;
+
+		wchar_t* WIDErespath = new wchar_t[realsiz];
+
+		// Convert char* to wchar_t*
+		size_t convertedChars = 0;
+		mbstowcs_s(&convertedChars, WIDErespath, realsiz, resourcePath, _TRUNCATE);
+
+		tIcon.hIcon = (HICON) LoadImageW(NULL, WIDErespath, IMAGE_ICON, 16, 16, LR_LOADFROMFILE | LR_DEFAULTCOLOR);
+
+		bool car = Shell_NotifyIconW(NIM_MODIFY, &tIcon);
+
+		DestroyIcon(tIcon.hIcon);
+
+		delete[] WIDErespath;
+
+		return car;
+		#endif
+	}
+
+	bool SDLWindow::ChangeTrayIconTip (const char* tip)
+	{
+		#if defined (HX_WINDOWS)
+		size_t realsiz = strlen(tip) + 1;
+
+		wchar_t* WIDEtip = new wchar_t[realsiz];
+
+		// Convert char* to wchar_t*
+		size_t convertedChars = 0;
+		mbstowcs_s(&convertedChars, WIDEtip, realsiz, tip, _TRUNCATE);
+
+		wcscpy_s((&tIcon.szTip)[128], WIDEtip);
+
+		bool car = Shell_NotifyIconW(NIM_MODIFY, &tIcon);
+
+		delete[] WIDEtip;
+
+		return car;
+		#endif
+	}
+
+	bool SDLWindow::RemoveTrayIcon ()
+	{
+		#if defined (HX_WINDOWS)
+		bool car = Shell_NotifyIconW(NIM_DELETE, &tIcon);
+		DestroyIcon(tIcon.hIcon);
+		return car;
+		#endif
+	}
 
 	void SDLWindow::SetTextInputRect (Rectangle * rect) {
 
@@ -1075,6 +1191,41 @@ namespace lime {
 
 	}
 
+
+	#ifndef EMSCRIPTEN
+	void SDLWindow::SetAlwaysOnTop(bool enabled)
+	{
+		if (enabled)
+			SDL_SetWindowAlwaysOnTop(sdlWindow, SDL_TRUE);
+		else
+			SDL_SetWindowAlwaysOnTop(sdlWindow,	SDL_FALSE);
+	}
+
+	int SDLWindow::Flash(int flashType)
+	{
+		SDL_FlashOperation daFlash;
+
+		switch (flashType)
+		{
+			case 0:
+				daFlash = SDL_FlashOperation::SDL_FLASH_CANCEL;
+			case 1:
+				daFlash = SDL_FlashOperation::SDL_FLASH_BRIEFLY;
+			case 2:
+				daFlash = SDL_FlashOperation::SDL_FLASH_UNTIL_FOCUSED;
+		}
+
+		return SDL_FlashWindow(sdlWindow, daFlash);
+	}
+	#endif
+
+	int SDLWindow::SetVSync (bool enabled)
+	{
+		if (enabled)
+			return SDL_RenderSetVSync(SDL_GetRenderer(sdlWindow), 1);
+		else
+			return SDL_RenderSetVSync(SDL_GetRenderer(sdlWindow), 0);
+	}
 
 	void SDLWindow::WarpMouse (int x, int y){
 
