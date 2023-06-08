@@ -95,7 +95,7 @@ class NativeWindow
 		if (Reflect.hasField(attributes, "maximized") && attributes.maximized) flags |= cast WindowFlags.WINDOW_FLAG_MAXIMIZED;
 		if (Reflect.hasField(attributes, "minimized") && attributes.minimized) flags |= cast WindowFlags.WINDOW_FLAG_MINIMIZED;
 		if (Reflect.hasField(attributes, "resizable") && attributes.resizable) flags |= cast WindowFlags.WINDOW_FLAG_RESIZABLE;
-		if (Reflect.hasField(attributes, "skipTaskBar") && attributes.skipTaskBar) flags |= cast WindowFlags.WINDOW_FLAG_SKIP_TASK_BAR;
+		if (Reflect.hasField(attributes, "skipTaskBar") && attributes.skipTaskBar) flags |= cast WindowFlags.WINDOW_FLAG_SKIP_TASKBAR;
 
 		if (contextAttributes.antialiasing >= 4)
 		{
@@ -817,6 +817,10 @@ class NativeWindow
 	var WINDOW_FLAG_MINIMIZED = 0x00002000;
 	var WINDOW_FLAG_MAXIMIZED = 0x00004000;
 	var WINDOW_FLAG_ALWAYS_ON_TOP = 0x00008000;
-	var WINDOW_FLAG_COLOR_DEPTH_32_BIT = 0x00010000;
-	var WINDOW_FLAG_SKIP_TASK_BAR = 0x00010000;
+	var WINDOW_FLAG_COLOR_DEPTH_32_BIT = 0x00100000;
+	var WINDOW_FLAG_SKIP_TASKBAR = 0x00010000;
+	//X11 only
+	var WINDOW_FLAG_POPUP_MENU = 0x00080000;
+	var WINDOW_FLAG_UTILITY = 0x00020000;
+	var WINDOW_FLAG_TOOLTIP = 0x00040000;
 }

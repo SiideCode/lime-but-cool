@@ -32,9 +32,8 @@ namespace lime {
 	SDLApplication::SDLApplication () {
 
 		Uint32 initFlags = SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER | SDL_INIT_TIMER | SDL_INIT_JOYSTICK;
-		#if defined(LIME_MOJOAL) || defined(LIME_OPENALSOFT)
+		//we're doing that shit anyway on CPP now, there's no alternatives, not gonna use MojoAL cause eh.
 		initFlags |= SDL_INIT_AUDIO;
-		#endif
 
 		if (SDL_Init (initFlags) != 0) {
 

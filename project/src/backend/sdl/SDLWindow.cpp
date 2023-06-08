@@ -67,15 +67,12 @@ namespace lime {
 		if (flags & WINDOW_FLAG_MINIMIZED) sdlWindowFlags |= SDL_WINDOW_MINIMIZED;
 		if (flags & WINDOW_FLAG_MAXIMIZED) sdlWindowFlags |= SDL_WINDOW_MAXIMIZED;
 		//documentation lied about SDL_WINDOW_SKIP_TASKBAR.
-		//according to SDL_windowswindow.c code it does work with win32 windows.
+		//according to SDL_windowswindow.c code it does work with win32 api windows.
 		if (flags & WINDOW_FLAG_SKIP_TASKBAR) sdlWindowFlags |= SDL_WINDOW_SKIP_TASKBAR;
-
-		//X11 is a linux-only window system lol.
-		#ifdef HX_LINUX
+		//these work only with X11
 		if (flags & WINDOW_FLAG_POPUP_MENU) sdlWindowFlags |= SDL_WINDOW_POPUP_MENU;
 		if (flags & WINDOW_FLAG_UTILITY) sdlWindowFlags |= SDL_WINDOW_UTILITY;
 		if (flags & WINDOW_FLAG_TOOLTIP) sdlWindowFlags |= SDL_WINDOW_TOOLTIP;
-		#endif
 
 		#ifndef EMSCRIPTEN
 		if (flags & WINDOW_FLAG_ALWAYS_ON_TOP) sdlWindowFlags |= SDL_WINDOW_ALWAYS_ON_TOP;

@@ -257,6 +257,8 @@
 			<file name="src/backend/sdl/SDLSystem.cpp" />
 			<file name="src/backend/sdl/SDLWindow.cpp" />
 
+			<file name="src/media/sdlaudio/SDLAudioBindings.cpp" />
+
 		</section>
 
 		<section if="LIME_TINYFILEDIALOGS">

@@ -4325,6 +4325,7 @@ namespace lime {
 
 }
 
+extern "C" int lime_sdl_audio_register_prims();
 
 #ifdef LIME_CAIRO
 extern "C" int lime_cairo_register_prims ();

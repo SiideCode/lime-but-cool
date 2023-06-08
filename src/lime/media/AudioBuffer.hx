@@ -1,7 +1,9 @@
 package lime.media;
 
+#if openfl
 import openfl.utils.ByteArray;
 import openfl.net.URLRequest;
+#end
 import haxe.io.Bytes;
 import haxe.io.Path;
 import lime._internal.backend.native.NativeCFFI;
