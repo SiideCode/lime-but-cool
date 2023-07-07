@@ -3,23 +3,93 @@
 #include <map>
 #include <algorithm>
 
+#include <utils/ValueTools.h>
+
 //unused, HL only
 //#include <system/CFFI.h>
 //#include <system/CFFIPointer.h>
 
 #include <utils/ArrayBufferView.h>
 //TODO: ADD AN ACTUAL GODDAMN AUDIO MIXER AAAAAAAAAA
-//#include <SDL_mixer.h>
+#include <SDL_mixer.h>
 
 //SDL Audio is somewhat easier to link to haxe than OpenAL honestly. huh.
 
 using namespace std;
 
+using namespace lime::valueConvert;
+
 namespace lime
 {
 	const char* defaultDeviceName;
-	vector<SDL_AudioSpec> desiredSpec;
+	map<int, SDL_AudioSpec> desiredSpec;
 	map<int, SDL_AudioSpec> obitanedSpec;
+
+	bool sdl_mixer_open_audio_device_values_by_id()
+	{
+
+	}
+
+	bool sdl_mixer_open_audio_device_values_by_name()
+	{
+
+	}
+
+	bool sdl_mixer_open_audio_device_spec_by_id(int desiredSpecID, int deviceIndex)
+	{
+		return Mix_OpenAudioDevice(desiredSpec.at(desiredSpecID).freq, desiredSpec.at(desiredSpecID).format, desiredSpec.at(desiredSpecID).channels, (desiredSpec.at(desiredSpecID).samples / desiredSpec.at(desiredSpecID).channels), SDL_GetAudioDeviceName(deviceIndex, false), 0);
+	}
+
+	bool sdl_mixer_open_audio_device_spec_by_name(int desiredSpecID, HxString deviceName)
+	{
+		return Mix_OpenAudioDevice(desiredSpec.at(desiredSpecID).freq, desiredSpec.at(desiredSpecID).format, desiredSpec.at(desiredSpecID).channels, (desiredSpec.at(desiredSpecID).samples / desiredSpec.at(desiredSpecID).channels), deviceName.__s, 0);
+	}
+
+	bool sdl_mixer_open_default_audio_device_spec(int desiredSpecID)
+	{
+		return Mix_OpenAudio(desiredSpec.at(desiredSpecID).freq, desiredSpec.at(desiredSpecID).format, desiredSpec.at(desiredSpecID).channels, (desiredSpec.at(desiredSpecID).samples / desiredSpec.at(desiredSpecID).channels));
+	}
+
+	bool sdl_mixer_open_default_audio_device_values(int freqency, int format, int channels, int samples)
+	{
+		SDL_AudioFormat rformat;
+
+		switch (rformat)
+		{
+			case 0:
+				rformat = AUDIO_S8;
+				break;
+			case 1:
+				rformat = AUDIO_U8;
+				break;
+			case 2:
+				rformat = AUDIO_S16;
+				break;
+			case 3:
+				rformat = AUDIO_U16;
+				break;
+			case 4:
+				rformat = AUDIO_S32;
+				break;
+			case 5:
+				rformat = AUDIO_F32;
+				break;
+			default:
+				rformat = AUDIO_F32;
+		}
+
+		return Mix_OpenAudio(freqency, rformat, channels, (samples / channels));
+	}
+
+	bool sdl_mixer_initialise(bool additionalDecoders)
+	{
+		return Mix_Init(additionalDecoders ? MIX_INIT_MID | MIX_INIT_MOD | MIX_INIT_OPUS : 0);
+	}
+
+	void sdl_mixer_quit()
+	{
+		Mix_Quit();
+	}
 
 	// TODO: Make volume be float that is from 0 to 1, but then converted to a closest int in range of 0-128
 	// where 0 is 0 float and 128 is 1 float.
@@ -62,24 +132,17 @@ namespace lime
 				format = AUDIO_F32;
 		}
 
-		Uint32 realLen;
-		memcpy_s(&realLen, sizeof(Uint32), (Uint32*) val_data(length), sizeof(Uint32));
-
-		printf_s("Copied bytes from HXCPP UInt to a Uint32 realLen variable. The copied value is %d", realLen);
-
 		ArrayBufferView bufferShit(destination);
 
 		ArrayBufferView bufferShitTwoElectricBoogaloo(source);
 
-		SDL_MixAudioFormat(bufferShit.buffer->b, bufferShitTwoElectricBoogaloo.buffer->b, format, realLen, volume);
+		SDL_MixAudioFormat(bufferShit.buffer->b, bufferShitTwoElectricBoogaloo.buffer->b, format, nekoValToUint32(length), volume);
 	}
 
 	value sdl_audio_get_device_status(value deviceID)
 	{
-		Uint32 realId;
-		memcpy_s(&realId, sizeof(Uint32), (Uint32*) val_data(deviceID), sizeof(Uint32));
 
-		SDL_AudioStatus meeeem = SDL_GetAudioDeviceStatus(realId);
+		SDL_AudioStatus meeeem = SDL_GetAudioDeviceStatus(nekoValToUint32(deviceID));
 		switch (meeeem)
 		{
 			case SDL_AUDIO_PLAYING:
@@ -92,46 +155,28 @@ namespace lime
 	}
 
 	/*
-	 *	@param length will be treated as Uint32
+	 *	@param length a Uint32 variable
 	 */
 	int sdl_audio_add_to_queue(value deviceID, value data, value length)
 	{
-		Uint32 realId;
-		memcpy_s(&realId, sizeof(Uint32), (Uint32*) val_data(deviceID), sizeof(Uint32));
-
-		Uint32 realLen;
-		memcpy_s(&realLen, sizeof(Uint32), (Uint32*) val_data(length), sizeof(Uint32));
-
 		ArrayBufferView bufferShit(data);
-		return SDL_QueueAudio(realId, bufferShit.buffer->b, realLen);
+		return SDL_QueueAudio(nekoValToUint32(deviceID), bufferShit.buffer->b, nekoValToUint32(length));
 	}
 
 	void sdl_audio_clear_queue(value deviceID)
 	{
-		Uint32 realId;
-		memcpy_s(&realId, sizeof(Uint32), (Uint32*) val_data(deviceID), sizeof(Uint32));
-
-		SDL_ClearQueuedAudio(realId);
+		SDL_ClearQueuedAudio(nekoValToUint32(deviceID));
 	}
 
 	int sdl_audio_remove_from_queue(value deviceID, value data, value length)
 	{
-		Uint32 realId;
-		memcpy_s(&realId, sizeof(Uint32), (Uint32*) val_data(deviceID), sizeof(Uint32));
-
-		Uint32 realLen;
-		memcpy_s(&realLen, sizeof(Uint32), (Uint32*) val_data(length), sizeof(Uint32));
-
 		ArrayBufferView bufferShit(data);
-		return SDL_DequeueAudio(realId, bufferShit.buffer->b, realLen);
+		return SDL_DequeueAudio(nekoValToUint32(deviceID), bufferShit.buffer->b, nekoValToUint32(length));
 	}
 
 	int sdl_audio_get_queue_size(value deviceID)
 	{
-		Uint32 realId;
-		memcpy_s(&realId, sizeof(Uint32), (Uint32*) val_data(deviceID), sizeof(Uint32));
-
-		return SDL_GetQueuedAudioSize(realId);
+		return SDL_GetQueuedAudioSize(nekoValToUint32(deviceID));
 	}
 
 	value sdl_audio_get_device_supported_format(int deviceIndex, bool isCapture)
@@ -160,7 +205,7 @@ namespace lime
 		{
 			SDL_AudioSpec datSpeek;
 			SDL_GetAudioDeviceSpec(deviceIndex, isCapture, &datSpeek);
-			obitanedSpec.at(deviceIndex) = datSpeek;
+			obitanedSpec.emplace(deviceIndex, datSpeek);
 			switch (datSpeek.format)
 			{
 				case AUDIO_S8:
@@ -189,7 +234,7 @@ namespace lime
 		{
 			SDL_AudioSpec datSpeek;
 			SDL_GetAudioDeviceSpec(deviceIndex, isCapture, &datSpeek);
-			obitanedSpec.at(deviceIndex) = datSpeek;
+			obitanedSpec.emplace(deviceIndex, datSpeek);
 			return datSpeek.channels;
 		}
 	}
@@ -202,7 +247,7 @@ namespace lime
 		{
 			SDL_AudioSpec datSpeek;
 			SDL_GetAudioDeviceSpec(deviceIndex, isCapture, &datSpeek);
-			obitanedSpec.at(deviceIndex) = datSpeek;
+			obitanedSpec.emplace(deviceIndex, datSpeek);
 			return datSpeek.freq;
 		}
 	}
@@ -269,10 +314,24 @@ namespace lime
 
 	void sdl_audio_pause_unpause_device(value deviceID, bool pauseOn)
 	{
-		Uint32 realId;
-		memcpy_s(&realId, sizeof(Uint32), (Uint32*) val_data(deviceID), sizeof(Uint32));
+		SDL_PauseAudioDevice(nekoValToUint32(deviceID), pauseOn);
+	}
 
-		SDL_PauseAudioDevice(realId, pauseOn);
+	int sdl_audio_open_default_device(int desiredSpecID)
+	{
+		SDL_AudioSpec datSpec;
+		int marr;
+
+		marr = SDL_OpenAudio(&desiredSpec.at(desiredSpecID), &datSpec);
+
+		obitanedSpec.emplace(1, datSpec);
+
+		return marr;
+	}
+
+	void sdl_audio_close_default_device()
+	{
+		SDL_CloseAudio();
 	}
 
 	/*
@@ -286,16 +345,18 @@ namespace lime
 	value sdl_audio_open_device_by_id(int deviceIndex, bool isCapture, int desiredSpecID)
 	{
 		const char* deviceName;
+		int devID;
+		SDL_AudioSpec datSpec;
 
 		if (deviceIndex)
 			deviceName = SDL_GetAudioDeviceName(deviceIndex, isCapture);
 		else
 			deviceName = NULL;
 
-		int devID;
-		SDL_AudioSpec datSpec;
-		devID = SDL_OpenAudioDevice(deviceName, isCapture, &desiredSpec[desiredSpecID], &datSpec, 0);
-		obitanedSpec.at(devID) = datSpec;
+		devID = SDL_OpenAudioDevice(deviceName, isCapture, &desiredSpec.at(desiredSpecID), &datSpec, 0);
+
+		obitanedSpec.emplace(devID, datSpec);
+
 		return alloc_int32(devID);
 	}
 
@@ -311,33 +372,29 @@ namespace lime
 	{
 		int devID;
 		SDL_AudioSpec datSpec;
-		devID = SDL_OpenAudioDevice(deviceName.c_str(), isCapture, &desiredSpec[desiredSpecID], &datSpec, 0);
-		obitanedSpec.at(devID) = datSpec;
+		devID = SDL_OpenAudioDevice(deviceName.c_str(), isCapture, &desiredSpec.at(desiredSpecID), &datSpec, 0);
+		obitanedSpec.emplace(devID, datSpec);
 		return alloc_int32(devID);
 	}
 
 	void sdl_audio_close_device(value deviceID)
 	{
-		Uint32 realId;
-		memcpy_s(&realId, sizeof(Uint32), (Uint32*) val_data(deviceID), sizeof(Uint32));
-
-		obitanedSpec.erase(realId);
-		SDL_CloseAudioDevice(realId);
+		//minimise memory operations lol
+		Uint32 m = nekoValToUint32(deviceID);
+		obitanedSpec.erase(m);
+		SDL_CloseAudioDevice(m);
 	}
 
 	/*
 	 *  @param specID ID of the SDL_AudioSpec structure to add, 1 by default.
 	 *	@param format can be 0 (signed 8 bit), 1 (unsigned 8 bit), 2 (signed 16 bit), 3 (unsigned 16 bit), 4 (signed 32 bit), 5 (float 32 bit), set as 32 bit float by default.
 	 */
-	int sdl_audio_create_desired_spec(int freq, value format, bool channels, value samples, value size)
+	int sdl_audio_create_desired_spec(int freq, value format, int channels, value samples, value size)
 	{
 		SDL_AudioSpec daspec;
 		daspec.freq = freq;
 
-		Uint8 daFormat;
-		memcpy_s(&daFormat, sizeof(Uint8), (Uint8*) val_data(format), sizeof(Uint8));
-
-		switch (daFormat)
+		switch (nekoValToUint8(format))
 		{
 			case 0:
 				daspec.format = AUDIO_S8;
@@ -361,86 +418,69 @@ namespace lime
 				daspec.format = AUDIO_F32;
 		}
 
-		if (channels)
-			daspec.channels = 2;
-		else
-			daspec.channels = 1;
+		daspec.channels = channels;
 
-		Uint16 daSamples;
-		memcpy_s(&daSamples, sizeof(Uint16), (Uint16*) val_data(samples), sizeof(Uint16));
+		daspec.samples = nekoValToUint16(samples);
 
-		daspec.samples = daSamples;
-
-		Uint32 daSize;
-		memcpy_s(&daSize, sizeof(Uint32), (Uint32*) val_data(size), sizeof(Uint32));
-
-		daspec.size = daSize;
+		daspec.size = nekoValToUint32(size);
 
 		daspec.userdata = NULL;
 		daspec.callback = NULL;
-   		desiredSpec.push_back(daspec);
+   		desiredSpec.emplace(desiredSpec.size(), daspec);
 		return desiredSpec.size();
 	}
 
-	void sdl_audio_update_desired_spec(int specID, int freq, value format, bool channels, value samples, value size)
+	bool sdl_audio_update_desired_spec(int specID, int freq, value format, int channels, value samples, value size)
 	{
-		if (desiredSpec[specID].samples)
+		if (desiredSpec.count(specID))
 		{
-			desiredSpec[specID].freq = freq;
+			desiredSpec.at(specID).freq = freq;
 
-			Uint8 daFormat;
-			memcpy_s(&daFormat, sizeof(Uint8), (Uint8*) val_data(format), sizeof(Uint8));
-
-			switch (daFormat)
+			switch (nekoValToUint8(format))
 			{
 				case 0:
-					desiredSpec[specID].format = AUDIO_S8;
+					desiredSpec.at(specID).format = AUDIO_S8;
 					break;
 				case 1:
-					desiredSpec[specID].format = AUDIO_U8;
+					desiredSpec.at(specID).format = AUDIO_U8;
 					break;
 				case 2:
-					desiredSpec[specID].format = AUDIO_S16;
+					desiredSpec.at(specID).format = AUDIO_S16;
 					break;
 				case 3:
-					desiredSpec[specID].format = AUDIO_U16;
+					desiredSpec.at(specID).format = AUDIO_U16;
 					break;
 				case 4:
-					desiredSpec[specID].format = AUDIO_S32;
+					desiredSpec.at(specID).format = AUDIO_S32;
 					break;
 				case 5:
-					desiredSpec[specID].format = AUDIO_F32;
+					desiredSpec.at(specID).format = AUDIO_F32;
 					break;
 				default:
-					desiredSpec[specID].format = AUDIO_F32;
+					desiredSpec.at(specID).format = AUDIO_F32;
 			}
 
-			if (channels)
-				desiredSpec[specID].channels = 2;
-			else
-				desiredSpec[specID].channels = 1;
+			desiredSpec.at(specID).channels = channels;
 
-			Uint16 daSamples;
-			memcpy_s(&daSamples, sizeof(Uint16), (Uint16*) val_data(samples), sizeof(Uint16));
+			desiredSpec.at(specID).samples = nekoValToUint16(samples);
 
-			desiredSpec[specID].samples = daSamples;
+			desiredSpec.at(specID).size = nekoValToUint32(size);
 
-			Uint32 daSize;
-			memcpy_s(&daSize, sizeof(Uint32), (Uint32*) val_data(size), sizeof(Uint32));
-
-			desiredSpec[specID].size = daSize;
+			return true;
 		}
+		else
+			return false;
 	}
 
 	int sdl_audio_remove_desired_spec(int specID)
 	{
-		if (desiredSpec[specID].samples)
+		if (desiredSpec.count(specID))
 		{
-			desiredSpec.erase(desiredSpec.begin() + specID);
-			return desiredSpec.size();
+			desiredSpec.erase(specID);
+			return 1;
 		}
 		else
-			return NULL;
+			return 0;
 	}
 
 	DEFINE_PRIME5v(sdl_audio_mix_audio);
@@ -466,7 +506,7 @@ namespace lime
 	DEFINE_PRIME3(sdl_audio_open_device_by_name);
 	DEFINE_PRIME1v(sdl_audio_close_device);
 	DEFINE_PRIME5(sdl_audio_create_desired_spec);
-	DEFINE_PRIME6v(sdl_audio_update_desired_spec);
+	DEFINE_PRIME6(sdl_audio_update_desired_spec);
 	DEFINE_PRIME1(sdl_audio_remove_desired_spec);
 }
 

@@ -17,16 +17,15 @@
   2. Altered source versions must be plainly marked as such, and must not be
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
+
+  James Le Cuirot
+  chewi@aura-online.co.uk
 */
-#ifndef MIXER_H_
-#define MIXER_H_
 
-/* Locking wrapper functions */
-extern void Mix_LockAudio(void);
-extern void Mix_UnlockAudio(void);
+/* This file supports playing MIDI files with FluidSynth */
 
-extern void add_chunk_decoder(const char *decoder);
+#include "music.h"
 
-#endif /* MIXER_H_ */
+extern Mix_MusicInterface Mix_MusicInterface_FLUIDSYNTH;
 
 /* vi: set ts=4 sw=4 expandtab: */

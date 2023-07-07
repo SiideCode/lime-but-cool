@@ -18,15 +18,11 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#ifndef MIXER_H_
-#define MIXER_H_
 
-/* Locking wrapper functions */
-extern void Mix_LockAudio(void);
-extern void Mix_UnlockAudio(void);
+/* This file supports Ogg Opus music streams */
 
-extern void add_chunk_decoder(const char *decoder);
+#include "music.h"
 
-#endif /* MIXER_H_ */
+extern Mix_MusicInterface Mix_MusicInterface_Opus;
 
 /* vi: set ts=4 sw=4 expandtab: */

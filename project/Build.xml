@@ -220,6 +220,7 @@
 
 			<section unless="emscripten">
 
+				<!--<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/sdlmixer/include" />-->
 				<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/sdl/include/" />
 				<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/sdl/include/configs/default/" unless="windows || mac || linux || rpi" />
 				<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/sdl/include/configs/linux/" if="linux" unless="rpi" />
@@ -257,7 +258,7 @@
 			<file name="src/backend/sdl/SDLSystem.cpp" />
 			<file name="src/backend/sdl/SDLWindow.cpp" />
 
-			<file name="src/media/sdlaudio/SDLAudioBindings.cpp" />
+			<!--<file name="src/media/sdlaudio/SDLAudioBindings.cpp" />-->
 
 		</section>
 
@@ -395,6 +396,7 @@
 		<files id="native-toolkit-vpx" if="LIME_VPX" />
 		<files id="native-toolkit-webm" if="LIME_WEBM" />
 		<files id="native-toolkit-zlib" if="LIME_ZLIB" />
+		<!--<files id="native-toolkit-sdl-mixer" />-->
 
 		<section unless="static_link">
 
