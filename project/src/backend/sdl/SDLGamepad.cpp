@@ -87,5 +87,152 @@ namespace lime {
 
 	}
 
+	//TODO: сделать чтобы это говно нормально выдавало строки, а не числа
+	int Gamepad::GetTypeID(int id)
+	{
+		return SDL_GameControllerGetType(gameControllers[id]);
+	}
 
+	int Gamepad::GetPlayerIndex(int id)
+	{
+		return SDL_GameControllerGetPlayerIndex(gameControllers[id]);
+	}
+
+	void Gamepad::SetPlayerIndex(int id, int index)
+	{
+		SDL_GameControllerSetPlayerIndex(gameControllers[id], index);
+	}
+
+	int Gamepad::GetProductID(int id)
+	{
+		return SDL_GameControllerGetProduct(gameControllers[id]);
+	}
+
+	int Gamepad::GetProductVersion(int id)
+	{
+		return SDL_GameControllerGetProductVersion(gameControllers[id]);
+	}
+
+	int Gamepad::GetVendorID(int id)
+	{
+		return SDL_GameControllerGetVendor(gameControllers[id]);
+	}
+
+	int Gamepad::GetFirmwareVersion(int id)
+	{
+		return SDL_GameControllerGetFirmwareVersion(gameControllers[id]);
+	}
+
+	const char* Gamepad::GetSerialNumber(int id)
+	{
+		return SDL_GameControllerGetSerial(gameControllers[id]);
+	}
+
+	int Gamepad::GetNumTouchpads(int id)
+	{
+		return SDL_GameControllerGetNumTouchpads(gameControllers[id]);
+	}
+
+	int Gamepad::GetMaxTouchpadFingers(int id, int touchpad)
+	{
+		return SDL_GameControllerGetNumTouchpadFingers(gameControllers[id], touchpad);
+	}
+
+	/*someobj Gamepad::GetTouchpadFingerData(int id, int touchpad, int finger, int* state, float* x, float* y, float* pressure)
+	{
+		return SDL_GameControllerGetTouchpadFinger(gameControllers[id], int touchpad, int finger);
+	}*/
+
+	bool Gamepad::HasSensor(int id, int sensor)
+	{
+		SDL_SensorType realsens;
+		switch (sensor)
+		{
+			case -1:
+				realsens = SDL_SENSOR_INVALID;
+			case 0:
+				realsens = SDL_SENSOR_UNKNOWN;
+			case 1:
+				realsens = SDL_SENSOR_ACCEL;
+			case 2:
+				realsens = SDL_SENSOR_GYRO;
+		}
+
+		return SDL_GameControllerHasSensor(gameControllers[id], realsens);
+	}
+
+	bool Gamepad::EnableSensor(int id, int sensor, bool enable)
+	{
+		SDL_SensorType realsens;
+		switch (sensor)
+		{
+			case -1:
+				realsens = SDL_SENSOR_INVALID;
+			case 0:
+				realsens = SDL_SENSOR_UNKNOWN;
+			case 1:
+				realsens = SDL_SENSOR_ACCEL;
+			case 2:
+				realsens = SDL_SENSOR_GYRO;
+		}
+
+		SDL_bool bll;
+		if (enable == true)
+			bll = SDL_TRUE;
+		else
+			bll = SDL_FALSE;
+
+		return SDL_GameControllerSetSensorEnabled(gameControllers[id], realsens, bll);
+	}
+
+	bool Gamepad::IsSensorEnabled(int id, int sensor)
+	{
+		SDL_SensorType realsens;
+		switch (sensor)
+		{
+			case -1:
+				realsens = SDL_SENSOR_INVALID;
+			case 0:
+				realsens = SDL_SENSOR_UNKNOWN;
+			case 1:
+				realsens = SDL_SENSOR_ACCEL;
+			case 2:
+				realsens = SDL_SENSOR_GYRO;
+		}
+
+		return SDL_GameControllerIsSensorEnabled(gameControllers[id], realsens);
+	}
+
+	//float Gamepad::GetSensorDataRate(int id, int sensor)
+
+	//float Gamepad::GetSensorData(int id, int type, int num_values)
+
+	bool Gamepad::StartRumble(int id, int lowFreq, int highFreq, int duration)
+	{
+		return SDL_GameControllerRumble(gameControllers[id], lowFreq, highFreq, duration);
+	}
+
+	//bool Gamepad::StartTriggerRumble(int id, int lowFreq, int highFreq, int duration)
+
+	bool Gamepad::HasLED(int id)
+	{
+		return SDL_GameControllerHasLED(gameControllers[id]);
+	}
+
+	bool Gamepad::HasRumble(int id)
+	{
+		return SDL_GameControllerHasRumble(gameControllers[id]);
+	}
+
+	bool Gamepad::HasTriggerRumble(int id)
+	{
+		return SDL_GameControllerHasRumbleTriggers(gameControllers[id]);
+	}
+
+	bool Gamepad::SetLED(int id, int red, int green, int blue)
+	{
+		return SDL_GameControllerSetLED(gameControllers[id], red, green, blue);
+	}
+
+	//bool Gamepad::StartEffect(noclue) //SDL_GameControllerSendEffect
 }
