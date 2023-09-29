@@ -28,8 +28,7 @@ namespace lime
 				return false;
 			}
 		}
-		else
-		if (resource->path)
+		else if (resource->path)
 		{
 			int result = mp3dec_load(&mp3dec, resource->path, &mp3info, NULL, NULL);
 			if (result < 0)
@@ -44,12 +43,18 @@ namespace lime
 			return false;
 		}
 
-		audioBuffer->bitrate = mp3info.avg_bitrate_kbps;
-		audioBuffer->sampleRate = mp3info.hz;
-		audioBuffer->bitsPerSample = SAMPLE_BITS;
-		audioBuffer->channels = mp3info.channels;
-
-		audioBuffer->data->Resize(mp3info.samples * sizeof(mp3d_sample_t));
+		if (mp3info.samples != 0)
+		{
+		    audioBuffer->data->Resize(mp3info.samples * sizeof(mp3d_sample_t));
+		    audioBuffer->sampleRate = mp3info.hz;
+		    audioBuffer->bitsPerSample = SAMPLE_BITS;
+		    audioBuffer->channels = mp3info.channels;
+		}
+		else
+		{
+		    LOG_SOUND("wowsers, turns out it's not an mp3");
+		    return false;
+                }
 
 		LOG_SOUND("resized data buffer to %zd ", mp3info.samples * sizeof(mp3d_sample_t));
 
