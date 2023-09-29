@@ -45,7 +45,6 @@ class AudioBuffer
 	public var channels:Int;
 	public var data:UInt8Array;
 	public var sampleRate:Int;
-	public var bitrate:Int;
 	public var src(get, set):Dynamic;
 
 	@:noCompletion private var __srcAudio:#if (js && html5) Audio #else Dynamic #end;
@@ -113,10 +112,6 @@ class AudioBuffer
 			audioBuffer.channels = data.channels;
 			audioBuffer.data = new UInt8Array(@:privateAccess new Bytes(data.data.length, data.data.b));
 			audioBuffer.sampleRate = data.sampleRate;
-			if (audioBuffer.bitrate != null)
-				audioBuffer.bitrate = data.bitrate;
-			elses
-				audioBuffer.bitrate = 0;
 			return audioBuffer;
 		}
 		#end
