@@ -33,9 +33,7 @@ class AssetsMacro
 			var constructor = macro
 				{
 					var bytes = haxe.Resource.getBytes(resourceName);
-					#if html5
-					super(bytes.b.buffer);
-					#elseif hl
+					#if hl
 					super(bytes.b, bytes.length);
 					#else
 					super(bytes.length, bytes.b);
@@ -275,11 +273,6 @@ class AssetsMacro
 
 		if (path != null && path != "")
 		{
-			#if html5
-			Sys.command("haxelib", ["run", "lime", "generate", "-font-hash", sys.FileSystem.fullPath(path)]);
-			path += ".hash";
-			#end
-
 			var bytes = File.getBytes(path);
 			var resourceName = "LIME_font_" + (classType.pack.length > 0 ? classType.pack.join("_") + "_" : "") + classType.name;
 
@@ -333,49 +326,16 @@ class AssetsMacro
 
 	macro public static function embedImage():Array<Field>
 	{
-		#if html5
-		var fields = embedData(":image", true);
-		#else
 		var fields = embedData(":image");
-		#end
 
 		if (fields != null)
 		{
 			#if !display
 			var constructor = macro
 				{
-					#if html5
-					super();
-
-					if (preload != null)
-					{
-						var buffer = new lime.graphics.ImageBuffer();
-						buffer.__srcImage = preload;
-						buffer.width = preload.width;
-						buffer.width = preload.height;
-
-						__fromImageBuffer(buffer);
-					}
-					else
-					{
-						__fromBase64(haxe.Resource.getString(resourceName), resourceType, function(image)
-						{
-							if (preload == null)
-							{
-								preload = image.buffer.__srcImage;
-							}
-
-							if (onload != null)
-							{
-								onload(image);
-							}
-						});
-					}
-					#else
 					super();
 
 					__fromBytes(haxe.Resource.getBytes(resourceName), null);
-					#end
 				};
 
 			var args = [
@@ -423,25 +383,6 @@ class AssetsMacro
 				}
 			];
 
-			#if html5
-			args.push(
-				{
-					name: "onload",
-					opt: true,
-					type: macro:Dynamic,
-					value: null
-				});
-			fields.push(
-				{
-					kind: FVar(macro:js.html.Image, null),
-					name: "preload",
-					doc: null,
-					meta: [],
-					access: [APublic, AStatic],
-					pos: Context.currentPos()
-				});
-			#end
-
 			fields.push(
 				{
 					name: "new",
@@ -467,7 +408,7 @@ class AssetsMacro
 
 		if (fields != null)
 		{
-			#if (openfl && !html5 && !display) // CFFILoader.h(248) : NOT Implemented:api_buffer_data
+			#if (openfl && !display) // CFFILoader.h(248) : NOT Implemented:api_buffer_data
 
 			var constructor = macro
 				{

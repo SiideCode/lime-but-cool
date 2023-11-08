@@ -12,9 +12,6 @@ import lime.math.Vector2;
 import lime.system.Endian;
 import lime.utils.BytePointer;
 import lime.utils.UInt8Array;
-#if (js && html5)
-import js.Browser;
-#end
 
 @:access(lime.graphics.ImageBuffer)
 class ImageCanvasUtil
@@ -28,89 +25,12 @@ class ImageCanvasUtil
 
 	public static function convertToCanvas(image:Image, clear:Bool = false):Void
 	{
-		#if (js && html5)
-		var buffer = image.buffer;
-
-		if (buffer.__srcImage != null)
-		{
-			if (buffer.__srcCanvas == null)
-			{
-				createCanvas(image, buffer.__srcImage.width, buffer.__srcImage.height);
-				buffer.__srcContext.drawImage(buffer.__srcImage, 0, 0);
-			}
-
-			buffer.__srcImage = null;
-		}
-		else if (buffer.__srcCanvas == null && buffer.data != null)
-		{
-			image.transparent = true;
-			createCanvas(image, buffer.width, buffer.height);
-			createImageData(image);
-
-			buffer.__srcContext.putImageData(buffer.__srcImageData, 0, 0);
-		}
-		else
-		{
-			if (image.type == DATA && buffer.__srcImageData != null && image.dirty)
-			{
-				buffer.__srcContext.putImageData(buffer.__srcImageData, 0, 0);
-				image.dirty = false;
-			}
-		}
-
-		if (clear)
-		{
-			buffer.data = null;
-			buffer.__srcImageData = null;
-		}
-		else
-		{
-			if (buffer.data == null && buffer.__srcImageData != null)
-			{
-				buffer.data = cast buffer.__srcImageData.data;
-			}
-		}
-		#end
-
 		image.type = CANVAS;
 	}
 
 	public static function convertToData(image:Image, clear:Bool = false):Void
 	{
 		var buffer = image.buffer;
-
-		#if (js && html5)
-		if (buffer.__srcImage != null)
-		{
-			convertToCanvas(image);
-		}
-
-		if (buffer.__srcCanvas != null && buffer.data == null)
-		{
-			createImageData(image);
-			if (image.type == CANVAS) image.dirty = false;
-		}
-		else if (image.type == CANVAS && buffer.__srcCanvas != null && image.dirty)
-		{
-			if (buffer.__srcImageData == null)
-			{
-				createImageData(image);
-			}
-			else
-			{
-				buffer.__srcImageData = buffer.__srcContext.getImageData(0, 0, buffer.width, buffer.height);
-				buffer.data = new UInt8Array(cast buffer.__srcImageData.data.buffer);
-			}
-
-			image.dirty = false;
-		}
-
-		if (clear)
-		{
-			image.buffer.__srcCanvas = null;
-			image.buffer.__srcContext = null;
-		}
-		#end
 
 		image.type = DATA;
 	}
@@ -178,48 +98,12 @@ class ImageCanvasUtil
 
 	public static function createCanvas(image:Image, width:Int, height:Int):Void
 	{
-		#if (js && html5)
-		var buffer = image.buffer;
 
-		if (buffer.__srcCanvas == null)
-		{
-			buffer.__srcCanvas = cast Browser.document.createElement("canvas");
-			buffer.__srcCanvas.width = width;
-			buffer.__srcCanvas.height = height;
-
-			if (!image.transparent)
-			{
-				if (!image.transparent) buffer.__srcCanvas.setAttribute("moz-opaque", "true");
-				buffer.__srcContext = untyped #if haxe4 js.Syntax.code #else __js__ #end ('buffer.__srcCanvas.getContext ("2d", { alpha: false })');
-			}
-			else
-			{
-				buffer.__srcContext = buffer.__srcCanvas.getContext("2d");
-			}
-		}
-		#end
 	}
 
 	public static function createImageData(image:Image):Void
 	{
-		#if (js && html5)
-		var buffer = image.buffer;
 
-		if (buffer.__srcImageData == null)
-		{
-			if (buffer.data == null)
-			{
-				buffer.__srcImageData = buffer.__srcContext.getImageData(0, 0, buffer.width, buffer.height);
-			}
-			else
-			{
-				buffer.__srcImageData = buffer.__srcContext.createImageData(buffer.width, buffer.height);
-				buffer.__srcImageData.data.set(cast buffer.data);
-			}
-
-			buffer.data = new UInt8Array(cast buffer.__srcImageData.data.buffer);
-		}
-		#end
 	}
 
 	public static function fillRect(image:Image, rect:Rectangle, color:Int, format:PixelFormat):Void
@@ -369,15 +253,6 @@ class ImageCanvasUtil
 	{
 		if (image == null) return;
 
-		#if (js && html5)
-		if (image.type == CANVAS && (image.buffer.__srcCanvas != null || image.buffer.data != null))
-		{
-			convertToCanvas(image, clear);
-		}
-		else if (image.type == DATA)
-		{
-			convertToData(image, clear);
-		}
-		#end
+
 	}
 }

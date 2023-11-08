@@ -1,8 +1,5 @@
 package lime.system;
 
-#if flash
-import flash.system.Capabilities;
-#end
 #if (lime_cffi && !macro)
 import lime._internal.backend.native.NativeCFFI;
 #end
@@ -20,11 +17,7 @@ class Locale
 	{
 		var locale:Array<LimeLocale> = null;
 
-		#if flash
-		locale.language = Capabilities.language;
-		#elseif (js && html5)
-		locale.language = untyped navigator.language;
-		#elseif (lime_cffi && !macro)
+		#if (lime_cffi && !macro)
 		var help:Array<Array<String>> = NativeCFFI.lime_locale_get_system_locale();
 		var mama:LimeLocale;
 		for (i in 0...help[0].length)

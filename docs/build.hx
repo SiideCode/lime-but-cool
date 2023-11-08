@@ -14,12 +14,6 @@ class Build extends Script
 				noOutput: true
 			});
 
-		var flash = base.clone();
-		flash.xml = "xml/Flash.xml";
-		flash.swf = "obj/docs";
-		flash.swfVersion = "17.0";
-		flash.build();
-
 		var native = base.clone();
 		native.cpp = "obj/docs";
 		native.define("native");
@@ -49,12 +43,6 @@ class Build extends Script
 		android.xml = "xml/Android.xml";
 		android.define("android");
 		android.build();
-
-		var html5 = base.clone();
-		html5.xml = "xml/HTML5.xml";
-		html5.js = "obj/docs";
-		html5.define("html5");
-		html5.build();
 
 		System.runCommand("", "haxelib", [
 			"run",

@@ -15,9 +15,6 @@ import hl.NativeArray;
 #if sys
 import sys.io.File;
 #end
-#if (js && html5)
-import js.html.Blob;
-#end
 
 /**
 	Simple file dialog used for asking user where to save a file, or select files to open.
@@ -358,43 +355,6 @@ class FileDialog
 
 		worker.run();
 
-		return true;
-		#elseif (js && html5)
-		// TODO: Cleaner API for mimeType detection
-
-		var defaultExtension = "";
-
-		if (Image.__isPNG(data))
-		{
-			type = "image/png";
-			defaultExtension = ".png";
-		}
-		else if (Image.__isJPG(data))
-		{
-			type = "image/jpeg";
-			defaultExtension = ".jpg";
-		}
-		else if (Image.__isGIF(data))
-		{
-			type = "image/gif";
-			defaultExtension = ".gif";
-		}
-		else if (Image.__isWebP(data))
-		{
-			type = "image/webp";
-			defaultExtension = ".webp";
-		}
-
-		var path = defaultPath != null ? Path.withoutDirectory(defaultPath) : "download" + defaultExtension;
-		var buffer = (data : Bytes).getData();
-		buffer = buffer.slice(0, (data : Bytes).length);
-
-		#if commonjs
-		untyped #if haxe4 js.Syntax.code #else __js__ #end ("require ('file-saver')")(new Blob([buffer], {type: type}), path, true);
-		#else
-		untyped window.saveAs(new Blob([buffer], {type: type}), path, true);
-		#end
-		onSave.dispatch(path);
 		return true;
 		#else
 		onCancel.dispatch();

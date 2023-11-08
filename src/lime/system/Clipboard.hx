@@ -3,11 +3,6 @@ package lime.system;
 import lime._internal.backend.native.NativeCFFI;
 import lime.app.Application;
 import lime.app.Event;
-#if flash
-import flash.desktop.Clipboard as FlashClipboard;
-#elseif (js && html5)
-import lime._internal.backend.html5.HTML5Window;
-#end
 
 #if !lime_debug
 @:fileXml('tags="haxe,release"')
@@ -37,11 +32,6 @@ class Clipboard
 		#else
 		_text = NativeCFFI.lime_clipboard_get_text();
 		#end
-		#elseif flash
-		if (FlashClipboard.generalClipboard.hasFormat(TEXT_FORMAT))
-		{
-			_text = FlashClipboard.generalClipboard.getData(TEXT_FORMAT);
-		}
 		#end
 		__updated = true;
 
@@ -56,9 +46,7 @@ class Clipboard
 	{
 		// Native clipboard (except Xorg) calls __update when clipboard changes.
 
-		#if (flash || js || html5)
-		__update();
-		#elseif linux
+		#if linux
 		// Xorg won't call __update until we call set_text at least once.
 		// Details: SDL_x11clipboard.c calls X11_XSetSelectionOwner,
 		// registering this app to receive clipboard events.
@@ -90,14 +78,6 @@ class Clipboard
 
 		#if (lime_cffi && !macro)
 		NativeCFFI.lime_clipboard_set_text(value);
-		#elseif flash
-		FlashClipboard.generalClipboard.setData(TEXT_FORMAT, value);
-		#elseif (js && html5)
-		var window = Application.current.window;
-		if (window != null)
-		{
-			window.__backend.setClipboard(value);
-		}
 		#end
 
 		if (_text != cacheText)

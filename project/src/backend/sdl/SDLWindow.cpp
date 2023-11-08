@@ -73,10 +73,7 @@ namespace lime {
 		if (flags & WINDOW_FLAG_POPUP_MENU) sdlWindowFlags |= SDL_WINDOW_POPUP_MENU;
 		if (flags & WINDOW_FLAG_UTILITY) sdlWindowFlags |= SDL_WINDOW_UTILITY;
 		if (flags & WINDOW_FLAG_TOOLTIP) sdlWindowFlags |= SDL_WINDOW_TOOLTIP;
-
-		#ifndef EMSCRIPTEN
 		if (flags & WINDOW_FLAG_ALWAYS_ON_TOP) sdlWindowFlags |= SDL_WINDOW_ALWAYS_ON_TOP;
-		#endif
 
 		#if defined (HX_WINDOWS) && defined (NATIVE_TOOLKIT_SDL_ANGLE) && !defined (HX_WINRT)
 		OSVERSIONINFOEXW osvi = { sizeof (osvi), 0, 0, 0, 0, {0}, 0, 0 };
@@ -92,7 +89,7 @@ namespace lime {
 		}
 		#endif
 
-		#if !defined(EMSCRIPTEN) && !defined(LIME_SWITCH)
+		#if !defined(LIME_SWITCH)
 		SDL_SetHint (SDL_HINT_ANDROID_TRAP_BACK_BUTTON, "0");
 		SDL_SetHint (SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
 		SDL_SetHint (SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
@@ -1034,8 +1031,6 @@ namespace lime {
 
 	bool SDLWindow::SetResizable (bool resizable) {
 
-		#ifndef EMSCRIPTEN
-
 		if (resizable) {
 
 			SDL_SetWindowResizable (sdlWindow, SDL_TRUE);
@@ -1047,10 +1042,6 @@ namespace lime {
 		}
 
 		return (SDL_GetWindowFlags (sdlWindow) & SDL_WINDOW_RESIZABLE);
-
-		#else
-
-		return resizable;
 
 		#endif
 
@@ -1189,7 +1180,6 @@ namespace lime {
 	}
 
 
-	#ifndef EMSCRIPTEN
 	void SDLWindow::SetAlwaysOnTop(bool enabled)
 	{
 		if (enabled)
@@ -1214,7 +1204,6 @@ namespace lime {
 
 		return SDL_FlashWindow(sdlWindow, daFlash);
 	}
-	#endif
 
 	int SDLWindow::SetVSync (bool enabled)
 	{

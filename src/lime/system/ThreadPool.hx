@@ -50,7 +50,7 @@ class ThreadPool
 		__workCompleted = 0;
 		#end
 
-		#if (emscripten || force_synchronous)
+		#if (force_synchronous)
 		__synchronous = true;
 		#end
 	}

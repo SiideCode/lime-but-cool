@@ -2777,8 +2777,6 @@ namespace lime {
 
 	HL_PRIM vbyte* HL_NAME(hl_system_get_device_model) () {
 
-		#ifndef EMSCRIPTEN
-
 		std::wstring* model = System::GetDeviceModel ();
 
 		if (model) {
@@ -2792,8 +2790,6 @@ namespace lime {
 			return (vbyte*)result;
 
 		}
-
-		#endif
 
 		return 0;
 
@@ -2821,8 +2817,6 @@ namespace lime {
 
 	HL_PRIM vbyte* HL_NAME(hl_system_get_device_vendor) () {
 
-		#ifndef EMSCRIPTEN
-
 		std::wstring* vendor = System::GetDeviceVendor ();
 
 		if (vendor) {
@@ -2836,8 +2830,6 @@ namespace lime {
 			return (vbyte*)result;
 
 		}
-
-		#endif
 
 		return 0;
 
@@ -2865,8 +2857,6 @@ namespace lime {
 
 	HL_PRIM vbyte* HL_NAME(hl_system_get_directory) (int type, hl_vstring* company, hl_vstring* title) {
 
-		#ifndef EMSCRIPTEN
-
 		std::wstring* path = System::GetDirectory ((SystemDirectory)type, company ? (char*)hl_to_utf8 ((const uchar*)company->bytes) : NULL, title ? (char*)hl_to_utf8 ((const uchar*)title->bytes) : NULL);
 
 		if (path) {
@@ -2880,8 +2870,6 @@ namespace lime {
 			return (vbyte*)result;
 
 		}
-
-		#endif
 
 		return 0;
 
@@ -2959,8 +2947,6 @@ namespace lime {
 
 	HL_PRIM vbyte* HL_NAME(hl_system_get_platform_label) () {
 
-		#ifndef EMSCRIPTEN
-
 		std::wstring* label = System::GetPlatformLabel ();
 
 		if (label) {
@@ -2974,8 +2960,6 @@ namespace lime {
 			return (vbyte*)result;
 
 		}
-
-		#endif
 
 		return 0;
 
@@ -3003,8 +2987,6 @@ namespace lime {
 
 	HL_PRIM vbyte* HL_NAME(hl_system_get_platform_name) () {
 
-		#ifndef EMSCRIPTEN
-
 		std::wstring* name = System::GetPlatformName ();
 
 		if (name) {
@@ -3018,8 +3000,6 @@ namespace lime {
 			return (vbyte*)result;
 
 		}
-
-		#endif
 
 		return 0;
 
@@ -3047,8 +3027,6 @@ namespace lime {
 
 	HL_PRIM vbyte* HL_NAME(hl_system_get_platform_version) () {
 
-		#ifndef EMSCRIPTEN
-
 		std::wstring* version = System::GetPlatformVersion ();
 
 		if (version) {
@@ -3062,8 +3040,6 @@ namespace lime {
 			return (vbyte*)result;
 
 		}
-
-		#endif
 
 		return 0;
 

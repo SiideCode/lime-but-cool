@@ -9,18 +9,6 @@ import lime.ui.WindowAttributes;
 import lime.utils.ArrayBuffer;
 import lime.utils.UInt8Array;
 import lime.utils.UInt16Array;
-#if flash
-import flash.net.URLRequest;
-import flash.system.Capabilities;
-import flash.Lib;
-#end
-#if air
-import flash.desktop.NativeApplication;
-#end
-#if ((js && html5) || electron)
-import js.html.Element;
-import js.Browser;
-#end
 #if sys
 import sys.io.Process;
 #end
@@ -229,31 +217,6 @@ class System
 
 			return display;
 		}
-		#elseif (flash || html5)
-		if (id == 0)
-		{
-			var display = new Display();
-			display.id = 0;
-			display.name = "Generic Display";
-
-			#if flash
-			display.dpi = Capabilities.screenDPI;
-			display.currentMode = new DisplayMode(Std.int(Capabilities.screenResolutionX), Std.int(Capabilities.screenResolutionY), 60, ARGB32);
-			#elseif (js && html5)
-			// var div = Browser.document.createElement ("div");
-			// div.style.width = "1in";
-			// Browser.document.body.appendChild (div);
-			// var ppi = Browser.document.defaultView.getComputedStyle (div, null).getPropertyValue ("width");
-			// Browser.document.body.removeChild (div);
-			// display.dpi = Std.parseFloat (ppi);
-			display.dpi = 96 * Browser.window.devicePixelRatio;
-			display.currentMode = new DisplayMode(Browser.window.screen.width, Browser.window.screen.height, 60, ARGB32);
-			#end
-
-			display.supportedModes = [display.currentMode];
-			display.bounds = new Rectangle(0, 0, display.currentMode.width, display.currentMode.height);
-			return display;
-		}
 		#end
 
 		return null;
@@ -263,10 +226,6 @@ class System
 	{
 		#if (kha && !macro)
 		return Std.int(kha.System.time * 1000);
-		#elseif flash
-		return flash.Lib.getTimer();
-		#elseif ((js && !nodejs) || electron)
-		return Std.int(Browser.window.performance.now());
 		#elseif (lime_cffi && !macro)
 		return cast NativeCFFI.lime_system_get_timer();
 		#elseif cpp
@@ -299,10 +258,6 @@ class System
 			Sys.command("/usr/bin/open", [path]);
 			#elseif linux
 			Sys.command("/usr/bin/xdg-open", [path]);
-			#elseif (js && html5)
-			Browser.window.open(path, "_blank");
-			#elseif flash
-			Lib.getURL(new URLRequest(path), "_blank");
 			#elseif android
 			var openFile = JNI.createStaticMethod("org/haxe/lime/GameActivity", "openFile", "(Ljava/lang/String;)V");
 			openFile(path);
@@ -316,11 +271,7 @@ class System
 	{
 		if (url != null)
 		{
-			#if (js && html5)
-			Browser.window.open(url, target);
-			#elseif flash
-			Lib.getURL(new URLRequest(url), target);
-			#elseif (lime_cffi && !macro)
+			#if (lime_cffi && !macro)
 			NativeCFFI.lime_system_open_url(url);
 			#end
 		}
@@ -396,20 +347,6 @@ class System
 
 			__directories.set(type, path);
 			return path;
-		}
-		#elseif flash
-		if (type != FONTS && Capabilities.playerType == "Desktop")
-		{
-			var propertyName = switch (type)
-			{
-				case APPLICATION: "applicationDirectory";
-				case APPLICATION_STORAGE: "applicationStorageDirectory";
-				case DESKTOP: "desktopDirectory";
-				case DOCUMENTS: "documentsDirectory";
-				default: "userDirectory";
-			}
-
-			return Reflect.getProperty(Type.resolveClass("flash.filesystem.File"), propertyName).nativePath;
 		}
 		#end
 
@@ -672,7 +609,7 @@ class System
 	{
 		if (__endianness == null)
 		{
-			#if (ps3 || wiiu || flash)
+			#if (ps3 || wiiu)
 			__endianness = BIG_ENDIAN;
 			#else
 			var arrayBuffer = new ArrayBuffer(2);
@@ -746,24 +683,10 @@ class System
 			__platformName = "iOS";
 			#elseif android
 			__platformName = "Android";
-			#elseif air
-			__platformName = "AIR";
-			#elseif flash
-			__platformName = "Flash Player";
 			#elseif tvos
 			__platformName = "tvOS";
 			#elseif tizen
 			__platformName = "Tizen";
-			#elseif blackberry
-			__platformName = "BlackBerry";
-			#elseif firefox
-			__platformName = "Firefox";
-			#elseif webos
-			__platformName = "webOS";
-			#elseif nodejs
-			__platformName = "Node.js";
-			#elseif js
-			__platformName = "HTML5";
 			#end
 		}
 
@@ -790,8 +713,6 @@ class System
 			__platformVersion = __runProcess("sw_vers", ["-productVersion"]);
 			#elseif linux
 			__platformVersion = __runProcess("lsb_release", ["-rs"]);
-			#elseif flash
-			__platformVersion = Capabilities.version;
 			#end
 		}
 

@@ -8,13 +8,8 @@ import lime.graphics.RenderContextAttributes;
 import lime.math.Rectangle;
 import lime.system.Display;
 import lime.system.DisplayMode;
-#if (js && html5)
-import js.html.Element;
-#end
 #if openfl
 import openfl.display.Stage;
-#elseif flash
-import flash.display.Stage;
 #else
 typedef Stage = Dynamic;
 #end
@@ -34,8 +29,8 @@ class Window
 	public var cursor(get, set):MouseCursor;
 	public var display(get, null):Display;
 	public var displayMode(get, set):DisplayMode;
-	#if (!lime_doc_gen || (js && html5))
-	public var element(default, null):#if (js && html5) Element #else Dynamic #end;
+	#if (!lime_doc_gen)
+	public var element(default, null): Dynamic;
 	#end
 
 	/**
@@ -85,7 +80,7 @@ class Window
 	public var parameters:Dynamic;
 	public var resizable(get, set):Bool;
 	public var scale(get, null):Float;
-	#if (!lime_doc_gen || flash || openfl)
+	#if (!lime_doc_gen || openfl)
 	public var stage(default, null):Stage;
 	#end
 	public var textInputEnabled(get, set):Bool;
@@ -108,33 +103,6 @@ class Window
 	@:noCompletion private var __width:Int;
 	@:noCompletion private var __x:Int;
 	@:noCompletion private var __y:Int;
-
-	#if commonjs
-	private static function __init__()
-	{
-		var p = untyped Window.prototype;
-		untyped Object.defineProperties(p,
-			{
-				"borderless": {get: p.get_borderless, set: p.set_borderless},
-				"cursor": {get: p.get_cursor, set: p.set_cursor},
-				"display": {get: p.get_display},
-				"displayMode": {get: p.get_displayMode, set: p.set_displayMode},
-				"frameRate": {get: p.get_frameRate, set: p.set_frameRate},
-				"fullscreen": {get: p.get_fullscreen, set: p.set_fullscreen},
-				"height": {get: p.get_height, set: p.set_height},
-				"maximized": {get: p.get_maximized, set: p.set_maximized},
-				"minimized": {get: p.get_minimized, set: p.set_minimized},
-				"mouseLock": {get: p.get_mouseLock, set: p.set_mouseLock},
-				"resizable": {get: p.get_resizable, set: p.set_resizable},
-				"scale": {get: p.get_scale},
-				"textInputEnabled": {get: p.get_textInputEnabled, set: p.set_textInputEnabled},
-				"title": {get: p.get_title, set: p.set_title},
-				"width": {get: p.get_width, set: p.set_width},
-				"x": {get: p.get_x, set: p.set_y},
-				"y": {get: p.get_x, set: p.set_y}
-			});
-	}
-	#end
 
 	@:noCompletion private function new(application:Application, attributes:WindowAttributes)
 	{
@@ -619,12 +587,4 @@ class Window
 	}
 }
 
-#if air
-@:noCompletion private typedef WindowBackend = lime._internal.backend.air.AIRWindow;
-#elseif flash
-@:noCompletion private typedef WindowBackend = lime._internal.backend.flash.FlashWindow;
-#elseif (js && html5)
-@:noCompletion private typedef WindowBackend = lime._internal.backend.html5.HTML5Window;
-#else
 @:noCompletion private typedef WindowBackend = lime._internal.backend.native.NativeWindow;
-#end

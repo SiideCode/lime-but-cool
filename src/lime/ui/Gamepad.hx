@@ -101,9 +101,6 @@ class Gamepad
 		#else
 		return NativeCFFI.lime_gamepad_get_device_guid(this.id);
 		#end
-		#elseif (js && html5)
-		var devices = Joystick.__getDeviceData();
-		return devices[this.id].id;
 		#else
 		return null;
 		#end
@@ -117,9 +114,6 @@ class Gamepad
 		#else
 		return NativeCFFI.lime_gamepad_get_device_name(this.id);
 		#end
-		#elseif (js && html5)
-		var devices = Joystick.__getDeviceData();
-		return devices[this.id].id;
 		#else
 		return null;
 		#end

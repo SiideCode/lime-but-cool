@@ -44,17 +44,12 @@ class Bytes
 	{
 		this.length = length;
 		this.b = b;
-		#if flash
-		b.endian = flash.utils.Endian.LITTLE_ENDIAN;
-		#end
 	}
 
 	public inline function get(pos:Int):Int
 	{
 		#if neko
 		return untyped $sget(b, pos);
-		#elseif flash
-		return b[pos];
 		#elseif cpp
 		return untyped b[pos];
 		#elseif java
@@ -70,8 +65,6 @@ class Bytes
 	{
 		#if neko
 		untyped $sset(b, pos, v);
-		#elseif flash
-		b[pos] = v;
 		#elseif cpp
 		untyped b[pos] = v;
 		#elseif java
@@ -95,9 +88,6 @@ class Bytes
 			untyped $sblit(b, pos, src.b, srcpos, len)
 		catch (e:Dynamic)
 			throw Error.OutsideBounds;
-		#elseif flash
-		b.position = pos;
-		if (len > 0) b.writeBytes(src.b, srcpos, len);
 		#elseif java
 		java.lang.System.arraycopy(src.b, srcpos, b, pos, len);
 		#elseif cs
@@ -126,17 +116,7 @@ class Bytes
 
 	public function fill(pos:Int, len:Int, value:Int)
 	{
-		#if flash
-		var v4 = value & 0xFF;
-		v4 |= v4 << 8;
-		v4 |= v4 << 16;
-		b.position = pos;
-		for (i in 0...len >> 2)
-			b.writeUnsignedInt(v4);
-		pos += len & ~3;
-		for (i in 0...len & 3)
-			set(pos++, value);
-		#elseif cpp
+		#if cpp
 		untyped __global__.__hxcpp_memory_memset(b, pos, len, value);
 		#else
 		for (i in 0...len)
@@ -152,11 +132,6 @@ class Bytes
 		#if neko
 		return try new Bytes(len, untyped __dollar__ssub(b, pos, len))
 		catch (e:Dynamic) throw Error.OutsideBounds;
-		#elseif flash
-		b.position = pos;
-		var b2 = new flash.utils.ByteArray();
-		b.readBytes(b2, 0, len);
-		return new Bytes(len, b2);
 		#elseif java
 		var newarr = new java.NativeArray(len);
 		java.lang.System.arraycopy(b, pos, newarr, 0, len);
@@ -176,34 +151,6 @@ class Bytes
 	{
 		#if neko
 		return untyped __dollar__compare(b, other.b);
-		#elseif flash
-		var len = (length < other.length) ? length : other.length;
-		var b1 = b;
-		var b2 = other.b;
-		b1.position = 0;
-		b2.position = 0;
-		b1.endian = flash.utils.Endian.BIG_ENDIAN;
-		b2.endian = flash.utils.Endian.BIG_ENDIAN;
-		for (i in 0...len >> 2)
-			if (b1.readUnsignedInt() != b2.readUnsignedInt())
-			{
-				b1.position -= 4;
-				b2.position -= 4;
-				var d = b1.readUnsignedInt() - b2.readUnsignedInt();
-				b1.endian = flash.utils.Endian.LITTLE_ENDIAN;
-				b2.endian = flash.utils.Endian.LITTLE_ENDIAN;
-				return d;
-			}
-		for (i in 0...len & 3)
-			if (b1.readUnsignedByte() != b2.readUnsignedByte())
-			{
-				b1.endian = flash.utils.Endian.LITTLE_ENDIAN;
-				b2.endian = flash.utils.Endian.LITTLE_ENDIAN;
-				return b1[b1.position - 1] - b2[b2.position - 1];
-			}
-		b1.endian = flash.utils.Endian.LITTLE_ENDIAN;
-		b2.endian = flash.utils.Endian.LITTLE_ENDIAN;
-		return length - other.length;
 		// #elseif cs
 		// TODO: memcmp if unsafe flag is on
 		#elseif cpp
@@ -222,16 +169,13 @@ class Bytes
 		Returns the IEEE double precision value at given position (in low endian encoding).
 		Result is unspecified if reading outside of the bounds
 	**/
-	#if (neko_v21 || (cpp && !cppia) || flash)
+	#if (neko_v21 || (cpp && !cppia))
 	inline
 	#end
 	public function getDouble(pos:Int):Float
 	{
 		#if neko_v21
 		return untyped $sgetd(b, pos, false);
-		#elseif flash
-		b.position = pos;
-		return b.readDouble();
 		#elseif cpp
 		if (pos < 0 || pos + 8 > length) throw Error.OutsideBounds;
 		return untyped __global__.__hxcpp_memory_get_double(b, pos);
@@ -244,16 +188,13 @@ class Bytes
 		Returns the IEEE single precision value at given position (in low endian encoding).
 		Result is unspecified if reading outside of the bounds
 	**/
-	#if (neko_v21 || (cpp && !cppia) || flash)
+	#if (neko_v21 || (cpp && !cppia))
 	inline
 	#end
 	public function getFloat(pos:Int):Float
 	{
 		#if neko_v21
 		return untyped $sgetf(b, pos, false);
-		#elseif flash
-		b.position = pos;
-		return b.readFloat();
 		#elseif cpp
 		if (pos < 0 || pos + 4 > length) throw Error.OutsideBounds;
 		return untyped __global__.__hxcpp_memory_get_float(b, pos);
@@ -266,7 +207,7 @@ class Bytes
 		Store the IEEE double precision value at given position in low endian encoding.
 		Result is unspecified if writing outside of the bounds.
 	**/
-	#if (neko_v21 || flash)
+	#if (neko_v21)
 	inline
 	#end
 	public function setDouble(pos:Int, v:Float):Void
@@ -275,9 +216,6 @@ class Bytes
 		untyped $ssetd(b, pos, v, false);
 		#elseif neko
 		untyped $sblit(b, pos, FPHelper._double_bytes(v, false), 0, 8);
-		#elseif flash
-		b.position = pos;
-		b.writeDouble(v);
 		#elseif cpp
 		if (pos < 0 || pos + 8 > length) throw Error.OutsideBounds;
 		untyped __global__.__hxcpp_memory_set_double(b, pos, v);
@@ -292,7 +230,7 @@ class Bytes
 		Store the IEEE single precision value at given position in low endian encoding.
 		Result is unspecified if writing outside of the bounds.
 	**/
-	#if (neko_v21 || flash)
+	#if (neko_v21)
 	inline
 	#end
 	public function setFloat(pos:Int, v:Float):Void
@@ -301,9 +239,6 @@ class Bytes
 		untyped $ssetf(b, pos, v, false);
 		#elseif neko
 		untyped $sblit(b, pos, FPHelper._float_bytes(v, false), 0, 4);
-		#elseif flash
-		b.position = pos;
-		b.writeFloat(v);
 		#elseif cpp
 		if (pos < 0 || pos + 4 > length) throw Error.OutsideBounds;
 		untyped __global__.__hxcpp_memory_set_float(b, pos, v);
@@ -395,9 +330,6 @@ class Bytes
 		#if neko
 		return try new String(untyped __dollar__ssub(b, pos, len))
 		catch (e:Dynamic) throw Error.OutsideBounds;
-		#elseif flash
-		b.position = pos;
-		return b.readUTFBytes(len);
 		#elseif cpp
 		var result:String = "";
 		untyped __global__.__hxcpp_string_of_bytes(b, result, pos, len);
@@ -464,9 +396,6 @@ class Bytes
 	{
 		#if neko
 		return new String(untyped __dollar__ssub(b, 0, length));
-		#elseif flash
-		b.position = 0;
-		return b.toString();
 		#elseif cs
 		return cs.system.text.Encoding.UTF8.GetString(b, 0, length);
 		#elseif java
@@ -506,10 +435,6 @@ class Bytes
 	{
 		#if neko
 		return new Bytes(length, untyped __dollar__smake(length));
-		#elseif flash
-		var b = new flash.utils.ByteArray();
-		b.length = length;
-		return new Bytes(length, b);
 		#elseif cpp
 		var a = new BytesData();
 		if (length > 0) cpp.NativeArray.setSize(a, length);
@@ -536,10 +461,6 @@ class Bytes
 	{
 		#if neko
 		return new Bytes(s.length, untyped __dollar__ssub(s.__s, 0, s.length));
-		#elseif flash
-		var b = new flash.utils.ByteArray();
-		b.writeUTFBytes(s);
-		return new Bytes(b.length, b);
 		#elseif cpp
 		var a = new BytesData();
 		untyped __global__.__hxcpp_bytes_of_string(a, s);
@@ -596,9 +517,7 @@ class Bytes
 
 	public static function ofData(b:BytesData)
 	{
-		#if flash
-		return new Bytes(b.length, b);
-		#elseif neko
+		#if neko
 		return new Bytes(untyped __dollar__ssize(b), b);
 		#elseif cs
 		return new Bytes(b.Length, b);
@@ -636,8 +555,6 @@ class Bytes
 	{
 		#if neko
 		return untyped __dollar__sget(b, pos);
-		#elseif flash
-		return b[pos];
 		#elseif cpp
 		return untyped b.unsafeGet(pos);
 		#elseif java

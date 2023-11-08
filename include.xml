@@ -7,33 +7,24 @@
 
 	<set name="lime" />
 
-	<define name="native" if="cpp || neko || nodejs || cs || java || hl" />
-	<define name="howlerjs" if="html5" />
+	<define name="native" if="cpp || neko || cs || java || hl" />
 
 	<define name="lime-cairo" if="native" />
-	<define name="lime-canvas" if="html5" />
 	<define name="lime-cffi" if="native" />
-	<define name="lime-curl" unless="lime-console || lime-switch || emscripten || flash || html5" />
-	<define name="lime-dom" if="html5" />
+	<define name="lime-curl" unless="lime-console || lime-switch" />
 	<define name="lime-harfbuzz" if="native" />
-	<define name="lime-howlerjs" if="html5" />
-	<define name="lime-html5" if="html5" />
 	<define name="lime-native" if="native" />
-	<define name="lime-openal" unless="lime-console || flash || html5" />
-	<define name="lime-opengl" if="desktop" unless="html5" />
-	<define name="lime-opengles" if="emscripten || mobile" />
+	<define name="lime-openal" unless="lime-console" />
+	<define name="lime-opengl" if="desktop" />
+	<define name="lime-opengles" if="mobile" />
 	<define name="lime-vorbis" if="native" />
-	<define name="lime-webgl" if="html5" />
 
 	<define name="no-typedarray-inline" if="cs" />
 	<haxedef name="no-compilation" />
 
 	<templatePath name="templates" />
-	<source path="externs/air" if="air" />
-	<haxeflag name="--macro" value="allowPackage('sys')" if="air" />
 	<sample path="samples" unless="openfl" />
 
-	<haxelib name="nodejs" if="nodejs" />
 	<haxelib name="format" if="java" />
 
 	<target name="ps3" handler="lime-ps3" />
@@ -59,11 +50,7 @@
 
 	<section if="hxp" unless="lime-tools">
 
-		<target name="air" path="tools/platforms/AIRPlatform.hx" />
 		<target name="android" path="tools/platforms/AndroidPlatform.hx" />
-		<target name="emscripten" path="tools/platforms/EmscriptenPlatform.hx" />
-		<target name="flash" path="tools/platforms/FlashPlatform.hx" />
-		<target name="html5" path="tools/platforms/HTML5Platform.hx" />
 		<target name="ios" path="tools/platforms/IOSPlatform.hx" />
 		<target name="linux" path="tools/platforms/LinuxPlatform.hx" />
 		<target name="mac" path="tools/platforms/MacPlatform.hx" />
@@ -77,17 +64,12 @@
 		<section if="cpp ${${haxe_ver} < 3.3}" unless="static_link">
 			<ndll name="std" haxelib="hxcpp" />
 			<ndll name="regexp" haxelib="hxcpp" />
-			<ndll name="zlib" haxelib="hxcpp" unless="emscripten || ios || tvos" />
+			<ndll name="zlib" haxelib="hxcpp" unless="ios || tvos" />
 		</section>
 
 		<ndll name="lime" if="native" unless="lime-console static_link || lime-switch static_link" />
 
 		<dependency name="extension-api" path="dependencies/extension-api" if="android" />
-		<dependency path="dependencies/howler.min.js" if="html5 howlerjs" embed="true" />
-		<dependency path="dependencies/pako.min.js" if="html5" embed="true" />
-		<dependency path="dependencies/FileSaver.min.js" if="html5" embed="true" />
-		<dependency path="dependencies/webgl-debug.js" if="html5 webgl-debug" embed="true" />
-		<dependency path="dependencies/stats.min.js" if="html5 stats" embed="true" />
 		<dependency path="dependencies/angle/d3dcompiler_47.dll" if="windows angle" unless="static_link" />
 		<dependency path="dependencies/angle/libegl.dll" if="windows angle" unless="static_link" />
 		<dependency path="dependencies/angle/libglesv2.dll" if="windows angle" unless="static_link" />
@@ -95,103 +77,16 @@
 		<!-- TODO: Move to template or move all template dependencies to XML? -->
 		<!-- <dependency name="CoreBluetooth.framework" if="ios" /> -->
 
-		<define name="native-trace" if="flash" unless="haxe-trace || haxetrace" />
-		<define name="fdb" if="flash debug" unless="nofdb" />
-
 		<define name="MACOSX_DEPLOYMENT_TARGET" value="10.9" if="mac" unless="MACOSX_DEPLOYMENT_TARGET" />
 		<setenv name="MACOSX_DEPLOYMENT_TARGET" value="${MACOSX_DEPLOYMENT_TARGET}" if="mac" />
 
 		<architecture name="armv7" if="android" />
-
-		<section if="emscripten">
-
-			<dependency name="pthread" />
-			<dependency name="openal" if="lime-openal" />
-
-		</section>
 
 		<section if="lime-modular">
 
 			<set name="haxe-module-name" value="haxe" unless="haxe-module-name" />
 			<set name="lime-module-name" value="lime" unless="lime-module-name" />
 			<setenv name="HAXE_STD_PATH" value="${HAXE_STD_PATH}" if="HAXE_STD_PATH" />
-
-			<module name="${haxe-module-name}" if="html5" unless="exclude-haxe-module">
-
-				<!--<source path="${HAXE_STD_PATH}" package="js.html" />-->
-				<source path="${HAXE_STD_PATH}" package="haxe.ds" exclude="haxe.ds.StringMap" />
-				<source path="${HAXE_STD_PATH}" package="haxe.io" />
-
-				<class name="haxe.CallStack" />
-				<class name="haxe.Log" />
-				<class name="haxe.Timer" />
-				<!-- <class name="js.Boot" /> -->
-				<class name="js.Browser" />
-				<class name="js.Cookie" />
-				<class name="js.Error" />
-				<!-- <class name="js.Lib" /> -->
-				<class name="js.Promise" />
-				<class name="js.RegExp" />
-				<class name="js.Selection" />
-				<class name="js.XMLSocket" />
-				<class name="EReg" />
-				<class name="HxOverrides" />
-				<class name="List" />
-				<class name="Math" />
-				<!-- <class name="Reflect" /> -->
-				<!-- <class name="Std" /> -->
-				<class name="StringBuf" />
-				<class name="StringTools" />
-				<!-- <class name="Type" /> -->
-
-				<include type="haxe.ds._StringMap.StringMapIterator" />
-				<include type="haxe.ds.TreeNode" />
-				<!-- <include type="haxe.IMap" /> -->
-				<include type="haxe._Int64.___Int64" />
-				<include type="haxe.StackItem" />
-				<include type="js.html._CanvasElement.CanvasUtil" />
-				<!-- <include type="js._Boot.HaxeError" /> -->
-				<include type="_List.ListIterator" />
-
-			</module>
-
-			<module name="${lime-module-name}" if="html5" unless="exclude-lime-module">
-
-				<source path="" package="lime" exclude="lime._backend.*|lime.project.*|lime.tools.*|lime.net.*|lime.graphics.console.*|lime.text.harfbuzz.*" />
-				<source path="" package="lime" include="lime._backend.html5" />
-
-				<class name="lime.net.HTTPRequest" />
-
-				<include type="lime.app._Future.FutureWork" />
-				<include type="lime.graphics.utils._ImageDataUtil.ImageDataView" />
-				<include type="lime.system._ThreadPool.ThreadPoolMessageType" />
-				<include type="lime.AssetLibrary" />
-
-				<!-- @:expose on enums do not work in Haxe 3.4.2 -->
-				<class remove="lime.graphics.opengl.GLContextType" />
-				<class remove="lime.graphics.ImageChannel" />
-				<class remove="lime.graphics.ImageType" />
-				<class remove="lime.graphics.RendererType" />
-				<class remove="lime.ui.FileDialogType" />
-				<class remove="lime.ui.MouseCursor" />
-				<class remove="lime.system.Endian" />
-				<class remove="lime.system.SensorType" />
-
-				<exclude type="lime.graphics.console.IndexBuffer" />
-				<exclude type="lime.graphics.console.PointerUtil" />
-				<exclude type="lime.graphics.console.Primitive" />
-				<exclude type="lime.graphics.console.RenderState" />
-				<exclude type="lime.graphics.console.Shader" />
-				<exclude type="lime.graphics.console.Texture" />
-				<exclude type="lime.graphics.console.TextureAddressMode" />
-				<exclude type="lime.graphics.console.TextureData" />
-				<exclude type="lime.graphics.console.TextureFilter" />
-				<exclude type="lime.graphics.console.TextureFormat" />
-				<exclude type="lime.graphics.console.VertexBuffer" />
-				<exclude type="lime.graphics.console.VertexDecl" />
-				<exclude type="lime.graphics.console.VertexOutput" />
-
-			</module>
 
 		</section>
 
