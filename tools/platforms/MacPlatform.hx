@@ -19,6 +19,7 @@ import lime.tools.Icon;
 import lime.tools.IconHelper;
 import lime.tools.JavaHelper;
 import lime.tools.NekoHelper;
+import lime.tools.NodeJSHelper;
 import lime.tools.Orientation;
 import lime.tools.Platform;
 import lime.tools.PlatformTarget;
@@ -142,6 +143,10 @@ class MacPlatform extends PlatformTarget
 		{
 			targetType = "java";
 		}
+		else if (project.targetFlags.exists("nodejs"))
+		{
+			targetType = "nodejs";
+		}
 		else if (project.targetFlags.exists("cs"))
 		{
 			targetType = "cs";
@@ -231,6 +236,15 @@ class MacPlatform extends PlatformTarget
 				Path.combine(executableDirectory, project.app.file + ".jar"));
 			JavaHelper.copyLibraries(project.templatePaths, "Mac" + (is64 ? "64" : ""), executableDirectory);
 		}
+		else if (targetType == "nodejs")
+		{
+			System.runCommand("", "haxe", [hxml]);
+
+			if (noOutput) return;
+
+			// NekoHelper.createExecutable (project.templatePaths, "Mac" + (is64 ? "64" : ""), targetDirectory + "/obj/ApplicationMain.n", executablePath);
+			// NekoHelper.copyLibraries (project.templatePaths, "Mac" + (is64 ? "64" : ""), executableDirectory);
+		}
 		else if (targetType == "cs")
 		{
 			System.runCommand("", "haxe", [hxml]);
@@ -280,7 +294,7 @@ class MacPlatform extends PlatformTarget
 			}
 		}
 
-		if (System.hostPlatform != WINDOWS && targetType != "java")
+		if (System.hostPlatform != WINDOWS && targetType != "nodejs" && targetType != "java")
 		{
 			System.runCommand("", "chmod", ["755", executablePath]);
 		}
@@ -315,6 +329,7 @@ class MacPlatform extends PlatformTarget
 	{
 		var context = project.templateContext;
 		context.NEKO_FILE = targetDirectory + "/obj/ApplicationMain.n";
+		context.NODE_FILE = executableDirectory + "/ApplicationMain.js";
 		context.HL_FILE = targetDirectory + "/obj/ApplicationMain.hl";
 		context.CPP_DIR = targetDirectory + "/obj/";
 		context.BUILD_DIR = project.app.path + "/mac" + (is64 ? "64" : "");
@@ -343,6 +358,8 @@ class MacPlatform extends PlatformTarget
 					hxml.neko = "_.n";
 				case "java":
 					hxml.java = "_";
+				case "nodejs":
+					hxml.js = "_.js";
 				default:
 					hxml.cpp = "_";
 			}
@@ -390,7 +407,11 @@ class MacPlatform extends PlatformTarget
 			arguments.push("-verbose");
 		}
 
-		if (targetType == "java")
+		if (targetType == "nodejs")
+		{
+			NodeJSHelper.run(project, executableDirectory + "/ApplicationMain.js", arguments);
+		}
+		else if (targetType == "java")
 		{
 			System.runCommand(executableDirectory, "java", ["-jar", project.app.file + ".jar"].concat(arguments));
 		}

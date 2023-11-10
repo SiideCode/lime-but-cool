@@ -211,13 +211,74 @@ class AssetHelper
 				type: Std.string(asset.type)
 			};
 
-		if (asset.embed == true || asset.type == FONT)
+		if (project.target == FLASH || project.target == AIR)
 		{
-			assetData.className = "__ASSET__" + asset.flatName;
+			if (asset.embed != false || asset.type == FONT)
+			{
+				assetData.className = "__ASSET__" + asset.flatName;
+			}
+			else
+			{
+				assetData.path = asset.resourceName;
+			}
+
+			if (asset.embed == false && asset.library != null && libraries.exists(asset.library))
+			{
+				assetData.preload = libraries[asset.library].preload;
+			}
+		}
+		else if (project.target == HTML5)
+		{
+			if (asset.type == FONT)
+			{
+				assetData.className = "__ASSET__" + asset.flatName;
+				assetData.preload = true;
+			}
+			else
+			{
+				assetData.path = asset.resourceName;
+
+				if (asset.embed != false || (asset.library != null && libraries.exists(asset.library) && libraries[asset.library].preload))
+				{
+					assetData.preload = true;
+				}
+
+				if (asset.type == MUSIC || asset.type == SOUND)
+				{
+					var soundName = Path.withoutExtension(assetData.path);
+
+					if (!pathGroups.exists(soundName))
+					{
+						pathGroups.set(soundName, [assetData.path]);
+					}
+					else
+					{
+						pathGroups[soundName].push(assetData.path);
+						Reflect.deleteField(assetData, "preload");
+					}
+
+					Reflect.deleteField(assetData, "path");
+					assetData.pathGroup = pathGroups[soundName];
+				}
+			}
 		}
 		else
 		{
-			assetData.path = asset.resourceName;
+			if (project.target == EMSCRIPTEN
+				&& (asset.embed != false
+					|| (asset.library != null && libraries.exists(asset.library) && libraries[asset.library].preload)))
+			{
+				assetData.preload = true;
+			}
+
+			if (asset.embed == true || asset.type == FONT)
+			{
+				assetData.className = "__ASSET__" + asset.flatName;
+			}
+			else
+			{
+				assetData.path = asset.resourceName;
+			}
 		}
 
 		return assetData;
@@ -329,6 +390,7 @@ class AssetHelper
 
 	private static function isPackedLibrary(project:HXProject, library:Library)
 	{
+		if (project.target == FLASH && library.embed != false) return false;
 
 		return switch (library.type)
 		{
@@ -487,7 +549,10 @@ class AssetHelper
 
 		for (library in project.libraries)
 		{
-			if (library.type == null)
+			if (library.type == null
+				|| (project.target == FLASH
+					&& library.embed != false
+					&& ["pak", "pack", "gzip", "zip", "deflate"].indexOf(library.type) > -1))
 			{
 				if (library.name == DEFAULT_LIBRARY_NAME)
 				{
@@ -561,6 +626,8 @@ class AssetHelper
 
 			if (isPackedLibrary(project, library))
 			{
+				// TODO
+				#if !nodejs
 				if (type == "zip") type = "deflate";
 
 				// TODO: Support library.embed=true by embedding all the assets instead of packing
@@ -633,6 +700,7 @@ class AssetHelper
 				{
 					library.preload = true;
 				}
+				#end
 			}
 		}
 

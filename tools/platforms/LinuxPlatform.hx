@@ -15,6 +15,7 @@ import lime.tools.DeploymentHelper;
 import lime.tools.HXProject;
 import lime.tools.JavaHelper;
 import lime.tools.NekoHelper;
+import lime.tools.NodeJSHelper;
 import lime.tools.Orientation;
 import lime.tools.Platform;
 import lime.tools.PlatformTarget;
@@ -144,6 +145,10 @@ class LinuxPlatform extends PlatformTarget
 			targetType = "hl";
 			is64 = true;
 		}
+		else if (project.targetFlags.exists("nodejs"))
+		{
+			targetType = "nodejs";
+		}
 		else if (project.targetFlags.exists("java"))
 		{
 			targetType = "java";
@@ -218,6 +223,12 @@ class LinuxPlatform extends PlatformTarget
 
 			HashlinkHelper.copyHashlink(project, targetDirectory, applicationDirectory, executablePath, is64);
 		}
+		else if (targetType == "nodejs")
+		{
+			System.runCommand("", "haxe", [hxml]);
+			// NekoHelper.createExecutable (project.templatePaths, "linux" + (is64 ? "64" : ""), targetDirectory + "/obj/ApplicationMain.n", executablePath);
+			// NekoHelper.copyLibraries (project.templatePaths, "linux" + (is64 ? "64" : ""), applicationDirectory);
+		}
 		else if (targetType == "java")
 		{
 			var libPath = Path.combine(Haxelib.getPath(new Haxelib("lime")), "templates/java/lib/");
@@ -284,7 +295,7 @@ class LinuxPlatform extends PlatformTarget
 			}
 		}
 
-		if (System.hostPlatform != WINDOWS && (targetType != "java"))
+		if (System.hostPlatform != WINDOWS && (targetType != "nodejs" && targetType != "java"))
 		{
 			System.runCommand("", "chmod", ["755", executablePath]);
 		}
@@ -327,6 +338,7 @@ class LinuxPlatform extends PlatformTarget
 		var context = project.templateContext;
 
 		context.NEKO_FILE = targetDirectory + "/obj/ApplicationMain.n";
+		context.NODE_FILE = targetDirectory + "/bin/ApplicationMain.js";
 		context.HL_FILE = targetDirectory + "/obj/ApplicationMain.hl";
 		context.CPP_DIR = targetDirectory + "/obj/";
 		context.BUILD_DIR = project.app.path + "/linux" + (is64 ? "64" : "") + (isRaspberryPi ? "-rpi" : "");
@@ -356,6 +368,8 @@ class LinuxPlatform extends PlatformTarget
 					hxml.neko = "_.n";
 				case "java":
 					hxml.java = "_";
+				case "nodejs":
+					hxml.js = "_.js";
 				default:
 					hxml.cpp = "_";
 			}
@@ -417,7 +431,11 @@ class LinuxPlatform extends PlatformTarget
 			arguments.push("-verbose");
 		}
 
-		if (targetType == "java")
+		if (targetType == "nodejs")
+		{
+			NodeJSHelper.run(project, targetDirectory + "/bin/ApplicationMain.js", arguments);
+		}
+		else if (targetType == "java")
 		{
 			System.runCommand(applicationDirectory, "java", ["-jar", project.app.file + ".jar"].concat(arguments));
 		}

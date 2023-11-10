@@ -11,6 +11,21 @@ package lime.graphics;
 	var CAIRO = "cairo";
 
 	/**
+		Describes an HTML5 canvas render context
+	**/
+	var CANVAS = "canvas";
+
+	/**
+		Describes an HTML5 DOM render context
+	**/
+	var DOM = "dom";
+
+	/**
+		Describes a Flash render context
+	**/
+	var FLASH = "flash";
+
+	/**
 		Describes an OpenGL render context
 	**/
 	var OPENGL = "opengl";
@@ -19,6 +34,11 @@ package lime.graphics;
 		Describes an OpenGL ES render context
 	**/
 	var OPENGLES = "opengles";
+
+	/**
+		Describes a WebGL render context
+	**/
+	var WEBGL = "webgl";
 
 	/**
 		Describes a custom render context

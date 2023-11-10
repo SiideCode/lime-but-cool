@@ -15,6 +15,8 @@ class CFFI
 	@:noCompletion private static var __moduleNames:Map<String, String> = null;
 	#if neko
 	private static var __loadedNekoAPI:Bool;
+	#elseif nodejs
+	private static var __nodeNDLLModule:Dynamic;
 	#end
 	public static var available:Bool;
 	public static var enabled:Bool;
@@ -87,7 +89,7 @@ class CFFI
 		}
 		else
 		{
-			#if (cpp && (iphone || android || static_link || tvos))
+			#if (cpp && (iphone || emscripten || android || static_link || tvos))
 			return cpp.Lib.load(library, method, args);
 			#end
 
@@ -108,6 +110,8 @@ class CFFI
 				#else
 				return neko.Lib.load(__moduleNames.get(library), method, args);
 				#end
+				#elseif nodejs
+				return untyped __nodeNDLLModule.load_lib(__moduleNames.get(library), method, args);
 				#elseif java
 				result = __loadJava(__moduleNames.get(library), method, args);
 				#elseif cs
@@ -116,6 +120,18 @@ class CFFI
 				return null;
 				#end
 			}
+
+			#if waxe
+			if (library == "lime")
+			{
+				flash.Lib.load("waxe", "wx_boot", 1);
+			}
+			#elseif nodejs
+			if (__nodeNDLLModule == null)
+			{
+				__nodeNDLLModule = untyped require('ndll');
+			}
+			#end
 
 			__moduleNames.set(library, library);
 
@@ -319,6 +335,8 @@ class CFFI
 			var result = cpp.Lib.load(name, func, args);
 			#elseif (neko)
 			var result = neko.Lib.load(name, func, args);
+			#elseif nodejs
+			var result = untyped __nodeNDLLModule.load_lib(name, func, args);
 			#elseif java
 			var result = __loadJava(name, func, args);
 			#elseif cs

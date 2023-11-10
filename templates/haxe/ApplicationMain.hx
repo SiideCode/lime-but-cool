@@ -31,6 +31,7 @@ import ::APP_MAIN::;
 		app.meta.set("packageName", "::meta.packageName::");
 		app.meta.set("version", "::meta.version::");
 
+		#if !flash
 		::foreach windows::
 		var attributes:lime.ui.WindowAttributes =
 			{
@@ -89,10 +90,12 @@ import ::APP_MAIN::;
 
 		app.createWindow(attributes);
 		::end::
+		#elseif !air
 
 		app.window.context.attributes.background = ::WIN_BACKGROUND::;
 		app.window.frameRate = ::WIN_FPS::;
 
+		#end
 		#end
 
 		// preloader.create ();
@@ -122,7 +125,7 @@ import ::APP_MAIN::;
 
 		var result = app.exec();
 
-		#if (sys && !ios)
+		#if (sys && !ios && !nodejs && !emscripten)
 		lime.system.System.exit(result);
 		#end
 

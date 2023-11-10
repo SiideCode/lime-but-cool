@@ -359,8 +359,22 @@ class PlatformSetup
 
 			switch (target)
 			{
+				case "air":
+					setupAIR();
+
 				case "android":
 					setupAndroid();
+
+				case "blackberry":
+
+				// setupBlackBerry ();
+
+				case "emscripten", "webassembly", "wasm":
+					setupEmscripten();
+
+				case "html5":
+					Log.println("\x1b[0;3mNo additional configuration is required.\x1b[0m");
+				// setupHTML5 ();
 
 				case "ios", "iphoneos", "iphonesim":
 					if (System.hostPlatform == MAC)
@@ -384,13 +398,20 @@ class PlatformSetup
 
 				// setupTizen ();
 
+				case "webos":
+
+				// setupWebOS ();
+
+				case "electron":
+					setupElectron();
+
 				case "windows", "winrt":
 					if (System.hostPlatform == WINDOWS)
 					{
 						setupWindows();
 					}
 
-				case "neko", "cs", "java":
+				case "neko", "cs", "uwp", "winjs", "nodejs", "java":
 					Log.println("\x1b[0;3mNo additional configuration is required.\x1b[0m");
 
 				case "hl", "hashlink":
@@ -551,6 +572,18 @@ class PlatformSetup
 		}
 	}
 
+	public static function setupAIR():Void
+	{
+		Log.println("\x1b[1mIn order to package SWF applications using Adobe AIR, you must");
+		Log.println("download and extract the Adobe AIR SDK.");
+		Log.println("");
+
+		getDefineValue("AIR_SDK", "Path to AIR SDK");
+
+		Log.println("");
+		Log.println("Setup complete.");
+	}
+
 	public static function setupAndroid():Void
 	{
 		Log.println("\x1b[1mIn order to build applications for Android, you must have recent");
@@ -572,6 +605,33 @@ class PlatformSetup
 		{
 			ConfigHelper.writeConfigValue("ANDROID_SETUP", "true");
 		}
+
+		Log.println("");
+		Log.println("Setup complete.");
+	}
+
+	public static function setupElectron():Void
+	{
+		Log.println("\x1b[1mIn order to run Electron applications, you must download");
+		Log.println("and extract the Electron runtime on your system.");
+		Log.println("");
+
+		getDefineValue("ELECTRON_PATH", "Path to Electron runtime");
+
+		Log.println("");
+		Haxelib.runCommand("", ["install", "electron"], true, true);
+
+		Log.println("");
+		Log.println("Setup complete.");
+	}
+
+	public static function setupEmscripten():Void
+	{
+		Log.println("\x1b[1mIn order to build for WebAssembly or asm.js, you must download");
+		Log.println("and install the Emscripten SDK.");
+		Log.println("");
+
+		getDefineValue("EMSCRIPTEN_SDK", "Path to Emscripten SDK");
 
 		Log.println("");
 		Log.println("Setup complete.");
@@ -627,6 +687,122 @@ class PlatformSetup
 		{
 			// Log.warn ("No setup is required for " + haxelib.name + ", or it is not a valid target");
 		}
+	}
+
+	public static function setupHTML5():Void
+	{
+		// var setApacheCordova = false;
+
+		// var defines = getDefines ();
+		// var answer = CLIHelper.ask ("Download and install Apache Cordova?");
+
+		// if (answer == YES || answer == ALWAYS) {
+
+		// 	var downloadPath = "";
+		// 	var defaultInstallPath = "";
+
+		// 	if (System.hostPlatform == WINDOWS) {
+
+		// 		defaultInstallPath = "C:\\Development\\Apache Cordova";
+
+		// 	} else {
+
+		// 		defaultInstallPath = "/opt/cordova";
+
+		// 	}
+
+		// 	var path = unescapePath (CLIHelper.param ("Output directory [" + defaultInstallPath + "]"));
+		// 	path = createPath (path, defaultInstallPath);
+
+		// 	downloadFile (apacheCordovaPath);
+		// 	extractFile (Path.withoutDirectory (apacheCordovaPath), path, "*");
+
+		// 	var childArchives = [];
+
+		// 	for (file in FileSystem.readDirectory (path)) {
+
+		// 		if (Path.extension (file) == "zip") {
+
+		// 			childArchives.push (file);
+
+		// 		}
+
+		// 	}
+
+		// 	createPath (path + "/lib");
+		// 	var libs = [ "android", "bada-wac", "bada", "blackberry", "ios", "mac", "qt", "tizen", "tvos", "webos", "wp7" ];
+
+		// 	for (archive in childArchives) {
+
+		// 		var name = Path.withoutExtension (archive);
+		// 		name = StringTools.replace (name, "incubator-", "");
+		// 		name = StringTools.replace (name, "cordova-", "");
+
+		// 		if (name == "blackberry-webworks") {
+
+		// 			name = "blackberry";
+
+		// 		}
+
+		// 		var basePath = path + "/";
+
+		// 		for (lib in libs) {
+
+		// 			if (name == lib) {
+
+		// 				basePath += "lib/";
+
+		// 			}
+
+		// 		}
+
+		// 		createPath (basePath + name);
+		// 		extractFile (path + "/" + archive, basePath + name);
+
+		// 	}
+
+		// 	if (System.hostPlatform != WINDOWS) {
+
+		// 		System.runCommand ("", "chmod", [ "-R", "777", path ], false);
+
+		// 	}
+
+		// 	setApacheCordova = true;
+		// 	defines.set ("CORDOVA_PATH", path);
+		// 	writeConfig (defines.get ("LIME_CONFIG"), defines);
+		// 	Log.println ("");
+
+		// }
+
+		// var requiredVariables = [];
+		// var requiredVariableDescriptions = [];
+
+		// if (!setApacheCordova) {
+
+		// 	requiredVariables.push ("CORDOVA_PATH");
+		// 	requiredVariableDescriptions.push ("Path to Apache Cordova");
+
+		// }
+
+		// requiredVariables = requiredVariables.concat ([ "WEBWORKS_SDK", "WEBWORKS_SDK_BBOS", "WEBWORKS_SDK_PLAYBOOK" ]);
+		// requiredVariableDescriptions = requiredVariableDescriptions.concat ([ "Path to WebWorks SDK for BlackBerry 10", "Path to WebWorks SDK for BBOS", "Path to WebWorks SDK for PlayBook" ]);
+
+		// defines = getDefines (requiredVariables, requiredVariableDescriptions);
+
+		// defines.set ("CORDOVA_PATH", unescapePath (defines.get ("CORDOVA_PATH")));
+		// defines.set ("WEBWORKS_SDK_BBOS", unescapePath (defines.get ("WEBWORKS_SDK_BBOS")));
+		// defines.set ("WEBWORKS_SDK_PLAYBOOK", unescapePath (defines.get ("WEBWORKS_SDK_PLAYBOOK")));
+
+		// // temporary hack
+
+		// /*Sys.println ("");
+		// Sys.println ("Setting Apache Cordova install path...");
+		// System.runCommand (defines.get ("CORDOVA_PATH") + "/lib/ios", "make", [ "install" ], true, true);
+		// Sys.println ("Done.");*/
+
+		// writeConfig (defines.get ("LIME_CONFIG"), defines);
+
+		// Haxelib.runCommand ("", [ "install", "cordova" ], true, true);
 	}
 
 	public static function setupIOS():Void

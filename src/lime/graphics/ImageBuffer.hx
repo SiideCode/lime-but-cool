@@ -3,6 +3,21 @@ package lime.graphics;
 import haxe.io.Bytes;
 import lime.graphics.cairo.CairoSurface;
 import lime.utils.UInt8Array;
+#if (js && html5)
+import lime._internal.graphics.ImageCanvasUtil;
+import js.html.CanvasElement;
+import js.html.CanvasRenderingContext2D;
+import js.html.Image as HTMLImage;
+import js.html.ImageData;
+import js.Browser;
+#if haxe4
+import js.lib.Uint8ClampedArray;
+#else
+import js.html.Uint8ClampedArray;
+#end
+#elseif flash
+import flash.display.BitmapData;
+#end
 
 /**
 	`ImageBuffer` is a simple object for storing image data.
@@ -64,12 +79,24 @@ class ImageBuffer
 	**/
 	public var width:Int;
 
-	@:noCompletion private var __srcBitmapData:Dynamic;
-	@:noCompletion private var __srcCanvas:Dynamic;
-	@:noCompletion private var __srcContext:Dynamic;
+	@:noCompletion private var __srcBitmapData:#if flash BitmapData #else Dynamic #end;
+	@:noCompletion private var __srcCanvas:#if (js && html5) CanvasElement #else Dynamic #end;
+	@:noCompletion private var __srcContext:#if (js && html5) CanvasRenderingContext2D #else Dynamic #end;
 	@:noCompletion private var __srcCustom:Dynamic;
-	@:noCompletion private var __srcImage:Dynamic;
-	@:noCompletion private var __srcImageData:Dynamic;
+	@:noCompletion private var __srcImage:#if (js && html5) HTMLImage #else Dynamic #end;
+	@:noCompletion private var __srcImageData:#if (js && html5) ImageData #else Dynamic #end;
+
+	#if commonjs
+	private static function __init__()
+	{
+		var p = untyped ImageBuffer.prototype;
+		untyped Object.defineProperties(p,
+			{
+				"src": {get: p.get_src, set: p.set_src},
+				"stride": {get: p.get_stride}
+			});
+	}
+	#end
 
 	/**
 		Creates a new `ImageBuffer` instance
@@ -103,6 +130,45 @@ class ImageBuffer
 
 		#if kha
 		// TODO
+		#elseif flash
+		if (__srcBitmapData != null) buffer.__srcBitmapData = __srcBitmapData.clone();
+		#elseif (js && html5)
+		if (data != null)
+		{
+			buffer.data = new UInt8Array(data.byteLength);
+			var copy = new UInt8Array(data);
+			buffer.data.set(copy);
+		}
+		else if (__srcImageData != null)
+		{
+			buffer.__srcCanvas = cast Browser.document.createElement("canvas");
+			buffer.__srcContext = cast buffer.__srcCanvas.getContext("2d");
+			buffer.__srcCanvas.width = __srcImageData.width;
+			buffer.__srcCanvas.height = __srcImageData.height;
+			buffer.__srcImageData = buffer.__srcContext.createImageData(__srcImageData.width, __srcImageData.height);
+			var copy = new Uint8ClampedArray(__srcImageData.data);
+			buffer.__srcImageData.data.set(copy);
+		}
+		else if (__srcCanvas != null)
+		{
+			buffer.__srcCanvas = cast Browser.document.createElement("canvas");
+			buffer.__srcContext = cast buffer.__srcCanvas.getContext("2d");
+			buffer.__srcCanvas.width = __srcCanvas.width;
+			buffer.__srcCanvas.height = __srcCanvas.height;
+			buffer.__srcContext.drawImage(__srcCanvas, 0, 0);
+		}
+		else
+		{
+			buffer.__srcImage = __srcImage;
+		}
+		#elseif nodejs
+		if (data != null)
+		{
+			buffer.data = new UInt8Array(data.byteLength);
+			var copy = new UInt8Array(data);
+			buffer.data.set(copy);
+		}
+		buffer.__srcCustom = __srcCustom;
 		#else
 		if (data != null)
 		{
@@ -122,12 +188,33 @@ class ImageBuffer
 	// Get & Set Methods
 	@:noCompletion private function get_src():Dynamic
 	{
+		#if (js && html5)
+		if (__srcImage != null) return __srcImage;
+		return __srcCanvas;
+		#elseif flash
+		return __srcBitmapData;
+		#else
 		return __srcCustom;
+		#end
 	}
 
 	@:noCompletion private function set_src(value:Dynamic):Dynamic
 	{
+		#if (js && html5)
+		if ((value is HTMLImage))
+		{
+			__srcImage = cast value;
+		}
+		else if ((value is CanvasElement))
+		{
+			__srcCanvas = cast value;
+			__srcContext = cast __srcCanvas.getContext("2d");
+		}
+		#elseif flash
+		__srcBitmapData = cast value;
+		#else
 		__srcCustom = value;
+		#end
 
 		return value;
 	}

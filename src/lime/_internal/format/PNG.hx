@@ -7,6 +7,9 @@ import lime.graphics.Image;
 import lime.graphics.ImageBuffer;
 import lime.system.CFFI;
 import lime.utils.UInt8Array;
+#if (js && html5)
+import js.Browser;
+#end
 #if format
 import format.png.Data;
 import format.png.Writer;
@@ -97,7 +100,7 @@ class PNG
 		}
 		#end
 
-		#if (format)
+		#if ((!js || !html5) && format)
 		#if (sys && (!disable_cffi || !format) && !macro)
 		else
 		#end
@@ -144,7 +147,11 @@ class PNG
 		if (image.buffer.__srcCanvas != null)
 		{
 			var data = image.buffer.__srcCanvas.toDataURL("image/png");
+			#if nodejs
+			var buffer = new js.node.Buffer((data.split(";base64,")[1] : String), "base64").toString("binary");
+			#else
 			var buffer = Browser.window.atob(data.split(";base64,")[1]);
+			#end
 			var bytes = Bytes.alloc(buffer.length);
 
 			for (i in 0...buffer.length)

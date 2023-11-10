@@ -9,6 +9,10 @@ import lime.graphics.Image;
 import lime.net.HTTPRequest;
 import lime.text.Font;
 import lime.utils.AssetType;
+#if flash
+import flash.display.BitmapData;
+import flash.media.Sound;
+#end
 
 #if !lime_debug
 @:fileXml('tags="haxe,release"')
@@ -58,10 +62,25 @@ class AssetLibrary
 				return true;
 			}
 
+			#if flash
+			if (requestedType == BINARY && (assetType == BINARY || assetType == TEXT || assetType == IMAGE))
+			{
+				return true;
+			}
+			else if (requestedType == TEXT && assetType == BINARY)
+			{
+				return true;
+			}
+			else if (requestedType == null || paths.exists(id))
+			{
+				return true;
+			}
+			#else
 			if (requestedType == BINARY || requestedType == null || (assetType == BINARY && requestedType == TEXT))
 			{
 				return true;
 			}
+			#end
 		}
 
 		return false;
@@ -171,7 +190,13 @@ class AssetLibrary
 		}
 		else if (classTypes.exists(id))
 		{
+			#if flash
+			var buffer = new AudioBuffer();
+			buffer.src = cast(Type.createInstance(classTypes.get(id), []), Sound);
+			return buffer;
+			#else
 			return AudioBuffer.fromBytes(cast(Type.createInstance(classTypes.get(id), []), Bytes));
+			#end
 		}
 		else
 		{
@@ -193,7 +218,24 @@ class AssetLibrary
 		}
 		else if (classTypes.exists(id))
 		{
+			#if flash
+			var data = Type.createInstance(classTypes.get(id), []);
+
+			switch (types.get(id))
+			{
+				case TEXT, BINARY:
+					return Bytes.ofData(cast(Type.createInstance(classTypes.get(id), []), flash.utils.ByteArray));
+
+				case IMAGE:
+					var bitmapData = cast(Type.createInstance(classTypes.get(id), []), BitmapData);
+					return Bytes.ofData(bitmapData.getPixels(bitmapData.rect));
+
+				default:
+					return null;
+			}
+			#else
 			return cast(Type.createInstance(classTypes.get(id), []), Bytes);
+			#end
 		}
 		else
 		{
@@ -209,7 +251,15 @@ class AssetLibrary
 		}
 		else if (classTypes.exists(id))
 		{
+			#if flash
+			var src = Type.createInstance(classTypes.get(id), []);
+
+			var font = new Font(src.fontName);
+			font.src = src;
+			return font;
+			#else
 			return cast(Type.createInstance(classTypes.get(id), []), Font);
+			#end
 		}
 		else
 		{
@@ -225,7 +275,11 @@ class AssetLibrary
 		}
 		else if (classTypes.exists(id))
 		{
+			#if flash
+			return Image.fromBitmapData(cast(Type.createInstance(classTypes.get(id), []), BitmapData));
+			#else
 			return cast(Type.createInstance(classTypes.get(id), []), Image);
+			#end
 		}
 		else
 		{
@@ -436,7 +490,11 @@ class AssetLibrary
 		}
 		else if (classTypes.exists(id))
 		{
+			#if flash
+			return Future.withValue(Bytes.ofData(Type.createInstance(classTypes.get(id), [])));
+			#else
 			return Future.withValue(Type.createInstance(classTypes.get(id), []));
+			#end
 		}
 		else
 		{

@@ -132,15 +132,27 @@ class HXProject extends Script
 
 		platformType = switch (target)
 		{
-			case ANDROID, IOS, TIZEN, TVOS:
+			case AIR if (targetFlags.exists("ios") || targetFlags.exists("android")):
 				PlatformType.MOBILE;
 
-			case WINDOWS, MAC, LINUX:
+			case FLASH, HTML5, FIREFOX, EMSCRIPTEN:
+				PlatformType.WEB;
+
+			case ANDROID, BLACKBERRY, IOS, TIZEN, WEBOS, TVOS:
+				PlatformType.MOBILE;
+
+			case WINDOWS, MAC, LINUX, AIR:
 				PlatformType.DESKTOP;
 
 			default:
 				// TODO: Better handling of platform type for pluggable targets
 				PlatformType.CONSOLE;
+		}
+
+		if (target == WINDOWS && targetFlags.exists("uwp") || targetFlags.exists("winjs"))
+		{
+			targetFlags.set("uwp", "");
+			targetFlags.set("winjs", "");
 		}
 
 		meta = {};
@@ -1206,7 +1218,10 @@ class HXProject extends Script
 			}
 		}
 
-		compilerFlags.push("-D " + Std.string(target).toLowerCase());
+		if (target != Platform.FLASH)
+		{
+			compilerFlags.push("-D " + Std.string(target).toLowerCase());
+		}
 
 		compilerFlags.push("-D " + Std.string(platformType).toLowerCase());
 		compilerFlags = compilerFlags.concat(haxeflags);

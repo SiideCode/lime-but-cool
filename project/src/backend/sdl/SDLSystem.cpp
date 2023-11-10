@@ -231,6 +231,10 @@ namespace lime {
 
 				result = new std::wstring (L"/system/fonts");
 
+				#elif defined (BLACKBERRY)
+
+				result = new std::wstring (L"/usr/fonts/font_repository/monotype");
+
 				#else
 
 				result = new std::wstring (L"/usr/share/fonts/truetype");
@@ -327,7 +331,9 @@ namespace lime {
 			alloc_field (display, id_bounds, Rectangle (bounds.x, bounds.y, bounds.w, bounds.h).Value ());
 
 			float dpi = 72.0;
+			#ifndef EMSCRIPTEN
 			SDL_GetDisplayDPI (id, &dpi, NULL, NULL);
+			#endif
 			alloc_field (display, id_dpi, alloc_float (dpi));
 
 			SDL_DisplayMode displayMode = { SDL_PIXELFORMAT_UNKNOWN, 0, 0, 0, 0 };
@@ -440,7 +446,9 @@ namespace lime {
 			hl_dyn_setp (display, id_bounds, &hlt_dynobj, _bounds);
 
 			float dpi = 72.0;
+			#ifndef EMSCRIPTEN
 			SDL_GetDisplayDPI (id, &dpi, NULL, NULL);
+			#endif
 			hl_dyn_setf (display, id_dpi, dpi);
 
 			SDL_DisplayMode displayMode = { SDL_PIXELFORMAT_UNKNOWN, 0, 0, 0, 0 };

@@ -183,6 +183,8 @@ class Timer
 		return flash.Lib.getTimer() / 1000;
 		#elseif (neko || php)
 		return Sys.time();
+		#elseif js
+		return Date.now().getTime() / 1000;
 		#elseif cpp
 		return untyped __global__.__time_stamp();
 		#elseif python

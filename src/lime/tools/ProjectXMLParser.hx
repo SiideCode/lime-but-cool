@@ -63,6 +63,10 @@ class ProjectXMLParser extends HXProject
 				defines.set("platformType", "desktop");
 				defines.set("desktop", "1");
 
+			case WEB:
+				defines.set("platformType", "web");
+				defines.set("web", "1");
+
 			case CONSOLE:
 				defines.set("platformType", "console");
 				defines.set("console", "1");
@@ -86,11 +90,39 @@ class ProjectXMLParser extends HXProject
 			defines.set("native", "1");
 			defines.set("java", "1");
 		}
+		else if (targetFlags.exists("nodejs"))
+		{
+			defines.set("targetType", "nodejs");
+			defines.set("native", "1");
+			defines.set("nodejs", "1");
+		}
 		else if (targetFlags.exists("cs"))
 		{
 			defines.set("targetType", "cs");
 			defines.set("native", "1");
 			defines.set("cs", "1");
+		}
+		else if (target == Platform.FIREFOX)
+		{
+			defines.set("targetType", "js");
+			defines.set("html5", "1");
+		}
+		else if (target == Platform.AIR)
+		{
+			defines.set("targetType", "swf");
+			defines.set("flash", "1");
+			if (targetFlags.exists("ios")) defines.set("ios", "1");
+			if (targetFlags.exists("android")) defines.set("android", "1");
+		}
+		else if (target == Platform.WINDOWS && (targetFlags.exists("uwp") || targetFlags.exists("winjs")))
+		{
+			targetFlags.set("uwp", "");
+			targetFlags.set("winjs", "");
+
+			defines.set("targetType", "js");
+			defines.set("html5", "1");
+			defines.set("uwp", "1");
+			defines.set("winjs", "1");
 		}
 		else if (platformType == DESKTOP && target != cast System.hostPlatform)
 		{
@@ -108,11 +140,17 @@ class ProjectXMLParser extends HXProject
 				defines.set("neko", "1");
 			}
 		}
-		else if (targetFlags.exists("cpp"))
+		else if (targetFlags.exists("cpp")
+			|| ((platformType != PlatformType.WEB) && !targetFlags.exists("html5"))
+			|| target == Platform.EMSCRIPTEN)
 		{
 			defines.set("targetType", "cpp");
 			defines.set("native", "1");
 			defines.set("cpp", "1");
+		}
+		else if (target == Platform.FLASH)
+		{
+			defines.set("targetType", "swf");
 		}
 
 		if (debug)

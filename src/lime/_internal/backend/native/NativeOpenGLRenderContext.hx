@@ -3286,6 +3286,7 @@ class NativeOpenGLRenderContext
 		__textureCubeMapBinding = null;
 	}
 
+	#if (!js || !html5 || doc_gen)
 	private function __createObject(id:Int):GLObject
 	{
 		return new GLObject(id);
@@ -3295,6 +3296,7 @@ class NativeOpenGLRenderContext
 	{
 		return (object == null) ? 0 : object.id;
 	}
+	#end
 
 	private function __initialize():Void
 	{

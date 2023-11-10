@@ -13,6 +13,10 @@
 #include <CoreFoundation/CoreFoundation.h>
 #endif
 
+#ifdef EMSCRIPTEN
+#include "emscripten.h"
+#endif
+
 
 namespace lime {
 
@@ -42,6 +46,12 @@ namespace lime {
 		currentApplication = this;
 
 		framePeriod = 1000.0 / 60.0;
+
+		#ifdef EMSCRIPTEN
+		emscripten_cancel_main_loop ();
+		emscripten_set_main_loop (UpdateFrame, 0, 0);
+		emscripten_set_main_loop_timing (EM_TIMING_RAF, 1);
+		#endif
 
 		currentUpdate = 0;
 		lastUpdate = 0;
@@ -93,7 +103,7 @@ namespace lime {
 
 		Init ();
 
-		#if defined(IPHONE)
+		#if defined(IPHONE) || defined(EMSCRIPTEN)
 
 		return 0;
 
@@ -114,7 +124,7 @@ namespace lime {
 
 	void SDLApplication::HandleEvent (SDL_Event* event) {
 
-		#if defined(IPHONE)
+		#if defined(IPHONE) || defined(EMSCRIPTEN)
 
 		int top = 0;
 		gc_set_top_of_stack(&top,false);
@@ -231,6 +241,7 @@ namespace lime {
 				ProcessMouseEvent (event);
 				break;
 
+			#ifndef EMSCRIPTEN
 			case SDL_RENDER_DEVICE_RESET:
 
 				renderEvent.type = RENDER_CONTEXT_LOST;
@@ -241,6 +252,7 @@ namespace lime {
 
 				renderEvent.type = RENDER;
 				break;
+			#endif
 
 			case SDL_TEXTINPUT:
 			case SDL_TEXTEDITING:
@@ -890,7 +902,7 @@ namespace lime {
 		SDL_Event event;
 		event.type = -1;
 
-		#if (!defined (IPHONE))
+		#if (!defined (IPHONE) && !defined (EMSCRIPTEN))
 
 		if (active && (firstTime || WaitEvent (&event))) {
 
@@ -923,6 +935,12 @@ namespace lime {
 				event.type = -1;
 
 			}
+
+		#elif defined (EMSCRIPTEN)
+
+			event.type = SDL_USEREVENT;
+			HandleEvent (&event);
+			event.type = -1;
 
 		#else
 
