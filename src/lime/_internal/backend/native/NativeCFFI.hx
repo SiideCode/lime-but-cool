@@ -1260,8 +1260,6 @@ class NativeCFFI
 
 	@:hlNative("lime", "hl_system_open_file") private static function lime_system_open_file(path:String):Void {}
 
-	//@:hlNative ()
-
 	@:hlNative("lime", "hl_system_open_url") private static function lime_system_open_url(url:String):Int {}
 
 	@:hlNative("lime", "hl_text_event_manager_register") private static function lime_text_event_manager_register(callback:Void->Void,

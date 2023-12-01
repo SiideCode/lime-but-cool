@@ -746,8 +746,6 @@ class System
 			__platformName = "iOS";
 			#elseif android
 			__platformName = "Android";
-			#elseif air
-			__platformName = "AIR";
 			#elseif flash
 			__platformName = "Flash Player";
 			#elseif tvos

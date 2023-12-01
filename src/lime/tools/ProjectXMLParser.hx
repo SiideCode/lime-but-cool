@@ -107,13 +107,6 @@ class ProjectXMLParser extends HXProject
 			defines.set("targetType", "js");
 			defines.set("html5", "1");
 		}
-		else if (target == Platform.AIR)
-		{
-			defines.set("targetType", "swf");
-			defines.set("flash", "1");
-			if (targetFlags.exists("ios")) defines.set("ios", "1");
-			if (targetFlags.exists("android")) defines.set("android", "1");
-		}
 		else if (target == Platform.WINDOWS && (targetFlags.exists("uwp") || targetFlags.exists("winjs")))
 		{
 			targetFlags.set("uwp", "");

@@ -132,16 +132,13 @@ class HXProject extends Script
 
 		platformType = switch (target)
 		{
-			case AIR if (targetFlags.exists("ios") || targetFlags.exists("android")):
-				PlatformType.MOBILE;
-
 			case FLASH, HTML5, FIREFOX, EMSCRIPTEN:
 				PlatformType.WEB;
 
 			case ANDROID, BLACKBERRY, IOS, TIZEN, WEBOS, TVOS:
 				PlatformType.MOBILE;
 
-			case WINDOWS, MAC, LINUX, AIR:
+			case WINDOWS, MAC, LINUX:
 				PlatformType.DESKTOP;
 
 			default:
@@ -978,7 +975,7 @@ class HXProject extends Script
 
 				if (asset.embed == null)
 				{
-					embeddedAsset.embed = (platformType == PlatformType.WEB || target == AIR);
+					embeddedAsset.embed = (platformType == PlatformType.WEB);
 				}
 
 				embeddedAsset.type = Std.string(asset.type).toLowerCase();
