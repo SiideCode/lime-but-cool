@@ -47,12 +47,6 @@ namespace lime {
 
 		framePeriod = 1000.0 / 60.0;
 
-		#ifdef EMSCRIPTEN
-		emscripten_cancel_main_loop ();
-		emscripten_set_main_loop (UpdateFrame, 0, 0);
-		emscripten_set_main_loop_timing (EM_TIMING_RAF, 1);
-		#endif
-
 		currentUpdate = 0;
 		lastUpdate = 0;
 		nextUpdate = 0;
@@ -102,6 +96,12 @@ namespace lime {
 	int SDLApplication::Exec () {
 
 		Init ();
+
+		#ifdef EMSCRIPTEN
+		emscripten_cancel_main_loop ();
+		emscripten_set_main_loop (UpdateFrame, 0, 0);
+		emscripten_set_main_loop_timing (EM_TIMING_RAF, 1);
+		#endif
 
 		#if defined(IPHONE) || defined(EMSCRIPTEN)
 
@@ -657,6 +657,7 @@ namespace lime {
 					mouseEvent.button = event->button.button - 1;
 					mouseEvent.x = event->button.x;
 					mouseEvent.y = event->button.y;
+					mouseEvent.clickCount = event->button.clicks;
 					break;
 
 				case SDL_MOUSEBUTTONUP:
@@ -667,6 +668,7 @@ namespace lime {
 					mouseEvent.button = event->button.button - 1;
 					mouseEvent.x = event->button.x;
 					mouseEvent.y = event->button.y;
+					mouseEvent.clickCount = event->button.clicks;
 					break;
 
 				case SDL_MOUSEWHEEL:
@@ -926,7 +928,7 @@ namespace lime {
 
 			currentUpdate = SDL_GetTicks ();
 
-		#if defined (IPHONE)
+		#if defined (IPHONE) || defined (EMSCRIPTEN)
 
 			if (currentUpdate >= nextUpdate) {
 
@@ -935,12 +937,6 @@ namespace lime {
 				event.type = -1;
 
 			}
-
-		#elif defined (EMSCRIPTEN)
-
-			event.type = SDL_USEREVENT;
-			HandleEvent (&event);
-			event.type = -1;
 
 		#else
 
@@ -967,7 +963,15 @@ namespace lime {
 
 	void SDLApplication::UpdateFrame () {
 
+		#ifdef EMSCRIPTEN
+		System::GCTryExitBlocking ();
+		#endif
+
 		currentApplication->Update ();
+
+		#ifdef EMSCRIPTEN
+		System::GCTryEnterBlocking ();
+		#endif
 
 	}
 

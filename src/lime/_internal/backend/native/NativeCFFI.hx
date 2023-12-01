@@ -327,6 +327,8 @@ class NativeCFFI
 
 	@:cffi private static function lime_window_get_mouse_lock(handle:Dynamic):Bool;
 
+	@:cffi private static function lime_window_get_opacity(handle:Dynamic):Float;
+
 	@:cffi private static function lime_window_get_scale(handle:Dynamic):Float;
 
 	@:cffi private static function lime_window_get_text_input_enabled(handle:Dynamic):Bool;
@@ -345,6 +347,10 @@ class NativeCFFI
 
 	@:cffi private static function lime_window_resize(handle:Dynamic, width:Int, height:Int):Void;
 
+	@:cffi private static function lime_window_set_minimum_size(handle:Dynamic, width:Int, height:Int):Void;
+
+	@:cffi private static function lime_window_set_maximum_size(handle:Dynamic, width:Int, height:Int):Void;
+
 	@:cffi private static function lime_window_set_borderless(handle:Dynamic, borderless:Bool):Bool;
 
 	@:cffi private static function lime_window_set_cursor(handle:Dynamic, cursor:Int):Void;
@@ -361,6 +367,8 @@ class NativeCFFI
 
 	@:cffi private static function lime_window_set_mouse_lock(handle:Dynamic, mouseLock:Bool):Void;
 
+	@:cffi private static function lime_window_set_opacity(handle:Dynamic, value:Float):Void;
+
 	@:cffi private static function lime_window_set_resizable(handle:Dynamic, resizable:Bool):Bool;
 
 	@:cffi private static function lime_window_set_text_input_enabled(handle:Dynamic, enabled:Bool):Void;
@@ -368,6 +376,8 @@ class NativeCFFI
 	@:cffi private static function lime_window_set_text_input_rect(handle:Dynamic, rect:Dynamic):Void;
 
 	@:cffi private static function lime_window_set_title(handle:Dynamic, title:String):Dynamic;
+
+	@:cffi private static function lime_window_set_visible(handle:Dynamic, visible:Bool):Bool;
 
 	@:cffi private static function lime_window_warp_mouse(handle:Dynamic, x:Int, y:Int):Void;
 
@@ -599,6 +609,7 @@ class NativeCFFI
 	private static var lime_window_get_id = new cpp.Callable<cpp.Object->Int>(cpp.Prime._loadPrime("lime", "lime_window_get_id", "oi", false));
 	private static var lime_window_get_mouse_lock = new cpp.Callable<cpp.Object->Bool>(cpp.Prime._loadPrime("lime", "lime_window_get_mouse_lock", "ob",
 		false));
+	private static var lime_window_get_opacity = new cpp.Callable<cpp.Object->Float>(cpp.Prime._loadPrime("lime", "lime_window_get_opacity", "od", false));
 	private static var lime_window_get_scale = new cpp.Callable<cpp.Object->Float>(cpp.Prime._loadPrime("lime", "lime_window_get_scale", "od", false));
 	private static var lime_window_get_text_input_enabled = new cpp.Callable<cpp.Object->Bool>(cpp.Prime._loadPrime("lime",
 		"lime_window_get_text_input_enabled", "ob", false));
@@ -611,6 +622,10 @@ class NativeCFFI
 	private static var lime_window_resize = new cpp.Callable<cpp.Object->Int->Int->cpp.Void>(cpp.Prime._loadPrime("lime", "lime_window_resize", "oiiv",
 		false));
 	private static var lime_window_remove_tray_icon = new cpp.Callable<cpp.Object->Bool>(cpp.Prime._loadPrime("lime", "lime_window_remove_tray_icon", "ob", false));
+	private static var lime_window_set_minimum_size = new cpp.Callable<cpp.Object->Int->Int->cpp.Void>(cpp.Prime._loadPrime("lime", "lime_window_set_minimum_size", "oiiv",
+		false));
+	private static var lime_window_set_maximum_size = new cpp.Callable<cpp.Object->Int->Int->cpp.Void>(cpp.Prime._loadPrime("lime", "lime_window_set_maximum_size", "oiiv",
+		false));
 	private static var lime_window_set_borderless = new cpp.Callable<cpp.Object->Bool->Bool>(cpp.Prime._loadPrime("lime", "lime_window_set_borderless", "obb",
 		false));
 	private static var lime_window_set_cursor = new cpp.Callable<cpp.Object->Int->cpp.Void>(cpp.Prime._loadPrime("lime", "lime_window_set_cursor", "oiv",
@@ -627,6 +642,8 @@ class NativeCFFI
 		false));
 	private static var lime_window_set_mouse_lock = new cpp.Callable<cpp.Object->Bool->cpp.Void>(cpp.Prime._loadPrime("lime", "lime_window_set_mouse_lock",
 		"obv", false));
+	private static var lime_window_set_opacity = new cpp.Callable<cpp.Object->Float->cpp.Void>(cpp.Prime._loadPrime("lime", "lime_window_set_opacity", "odv",
+		false));
 	private static var lime_window_set_resizable = new cpp.Callable<cpp.Object->Bool->Bool>(cpp.Prime._loadPrime("lime", "lime_window_set_resizable", "obb",
 		false));
 	private static var lime_window_set_text_input_enabled = new cpp.Callable<cpp.Object->Bool->cpp.Void>(cpp.Prime._loadPrime("lime",
@@ -634,6 +651,8 @@ class NativeCFFI
 	private static var lime_window_set_text_input_rect = new cpp.Callable<cpp.Object->cpp.Object->cpp.Void>(cpp.Prime._loadPrime("lime",
 		"lime_window_set_text_input_rect", "oov", false));
 	private static var lime_window_set_title = new cpp.Callable<cpp.Object->String->cpp.Object>(cpp.Prime._loadPrime("lime", "lime_window_set_title", "oso",
+		false));
+	private static var lime_window_set_visible = new cpp.Callable<cpp.Object->Bool->Bool>(cpp.Prime._loadPrime("lime", "lime_window_set_visible", "obb",
 		false));
 	private static var lime_window_warp_mouse = new cpp.Callable<cpp.Object->Int->Int->cpp.Object>(cpp.Prime._loadPrime("lime", "lime_window_warp_mouse",
 		"oiiv", false));
@@ -780,6 +799,7 @@ class NativeCFFI
 	private static var lime_window_get_height = CFFI.load("lime", "lime_window_get_height", 1);
 	private static var lime_window_get_id = CFFI.load("lime", "lime_window_get_id", 1);
 	private static var lime_window_get_mouse_lock = CFFI.load("lime", "lime_window_get_mouse_lock", 1);
+	private static var lime_window_get_opacity = CFFI.load("lime", "lime_window_get_opacity", 1);
 	private static var lime_window_get_scale = CFFI.load("lime", "lime_window_get_scale", 1);
 	private static var lime_window_get_text_input_enabled = CFFI.load("lime", "lime_window_get_text_input_enabled", 1);
 	private static var lime_window_get_width = CFFI.load("lime", "lime_window_get_width", 1);
@@ -789,6 +809,8 @@ class NativeCFFI
 	private static var lime_window_read_pixels = CFFI.load("lime", "lime_window_read_pixels", 3);
 	private static var lime_window_resize = CFFI.load("lime", "lime_window_resize", 3);
 	private static var lime_window_remove_tray_icon = CFFI.load("lime", "lime_window_remove_tray_icon", 1);
+	private static var lime_window_set_minimum_size = CFFI.load("lime", "lime_window_set_minimum_size", 3);
+	private static var lime_window_set_maximum_size = CFFI.load("lime", "lime_window_set_maximum_size", 3);
 	private static var lime_window_set_borderless = CFFI.load("lime", "lime_window_set_borderless", 2);
 	private static var lime_window_set_cursor = CFFI.load("lime", "lime_window_set_cursor", 2);
 	private static var lime_window_set_display_mode = CFFI.load("lime", "lime_window_set_display_mode", 2);
@@ -797,10 +819,12 @@ class NativeCFFI
 	private static var lime_window_set_maximized = CFFI.load("lime", "lime_window_set_maximized", 2);
 	private static var lime_window_set_minimized = CFFI.load("lime", "lime_window_set_minimized", 2);
 	private static var lime_window_set_mouse_lock = CFFI.load("lime", "lime_window_set_mouse_lock", 2);
+	private static var lime_window_set_opacity = CFFI.load("lime", "lime_window_set_opacity", 2);
 	private static var lime_window_set_resizable = CFFI.load("lime", "lime_window_set_resizable", 2);
 	private static var lime_window_set_text_input_enabled = CFFI.load("lime", "lime_window_set_text_input_enabled", 2);
 	private static var lime_window_set_text_input_rect = CFFI.load("lime", "lime_window_set_text_input_rect", 2);
 	private static var lime_window_set_title = CFFI.load("lime", "lime_window_set_title", 2);
+	private static var lime_window_set_visible = CFFI.load("lime", "lime_window_set_visible", 2);
 	private static var lime_window_warp_mouse = CFFI.load("lime", "lime_window_warp_mouse", 3);
 	private static var lime_window_event_manager_register = CFFI.load("lime", "lime_window_event_manager_register", 2);
 	private static var lime_zlib_compress = CFFI.load("lime", "lime_zlib_compress", 2);
@@ -1372,6 +1396,10 @@ class NativeCFFI
 
 	@:hlNative("lime", "hl_window_remove_tray_icon") private static function lime_window_remove_tray_icon(handle:CFFIPointer):Bool {}
 
+	@:hlNative("lime", "hl_window_set_minimum_size") private static function lime_window_set_minimum_size(handle:CFFIPointer, width:Int, height:Int):Void {}
+
+	@:hlNative("lime", "hl_window_set_maximum_size") private static function lime_window_set_maximum_size(handle:CFFIPointer, width:Int, height:Int):Void {}
+
 	@:hlNative("lime", "hl_window_set_borderless") private static function lime_window_set_borderless(handle:CFFIPointer, borderless:Bool):Bool
 	{
 		return false;
@@ -1417,7 +1445,16 @@ class NativeCFFI
 		return null;
 	}
 
+	@:hlNative("lime", "hl_window_set_visible") private static function lime_window_set_visible(handle:CFFIPointer, visible:Bool):Bool
+	{
+		return false;
+	}
+
 	@:hlNative("lime", "hl_window_warp_mouse") private static function lime_window_warp_mouse(handle:CFFIPointer, x:Int, y:Int):Void {}
+
+	@:hlNative("lime", "hl_window_get_opacity") private static function lime_window_get_opacity(handle:CFFIPointer):Float { return 0.0; }
+
+	@:hlNative("lime", "hl_window_set_opacity") private static function lime_window_set_opacity(handle:CFFIPointer, value:Float):Void {}
 
 	@:hlNative("lime", "hl_window_event_manager_register") private static function lime_window_event_manager_register(callback:Void->Void,
 		eventObject:WindowEventInfo):Void {}

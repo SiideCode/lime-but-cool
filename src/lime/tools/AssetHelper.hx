@@ -224,7 +224,21 @@ class AssetHelper
 		}
 		else
 		{
-			assetData.path = asset.resourceName;
+			if (project.target == WEB_ASSEMBLY
+				&& (asset.embed != false
+					|| (asset.library != null && libraries.exists(asset.library) && libraries[asset.library].preload)))
+			{
+				assetData.preload = true;
+			}
+
+			if (asset.embed == true || asset.type == FONT)
+			{
+				assetData.className = "__ASSET__" + asset.flatName;
+			}
+			else
+			{
+				assetData.path = asset.resourceName;
+			}
 		}
 
 		return assetData;

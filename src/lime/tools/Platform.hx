@@ -15,6 +15,7 @@ enum abstract Platform(String)
 	var PS4 = "ps4";
 	var TIZEN = "tizen";
 	var VITA = "vita";
+	var WEB_ASSEMBLY = "webassembly";
 	var WINDOWS = "windows";
 	var WEBOS = "webos";
 	var WIIU = "wiiu";
