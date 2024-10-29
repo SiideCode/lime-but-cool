@@ -457,6 +457,27 @@ class Window
 		return __backend.removeTrayIcon();
 	}
 
+	public function setIcon(image:Image):Void
+	{
+		if (image == null)
+		{
+			return;
+		}
+
+		__backend.setIcon(image);
+	}
+
+	public function toString():String
+	{
+		return "[object Window]";
+	}
+
+	public function warpMouse(x:Int, y:Int):Void
+	{
+		__backend.warpMouse(x, y);
+	}
+
+
 	public function setMinSize(width:Int, height:Int):Void
 	{
 		__backend.setMinSize(width, height);
@@ -477,26 +498,6 @@ class Window
 		if (__width > __maxWidth || __height > __maxHeight) {
 			resize(__width, __height);
 		}
-	}
-
-	public function setIcon(image:Image):Void
-	{
-		if (image == null)
-		{
-			return;
-		}
-
-		__backend.setIcon(image);
-	}
-
-	public function toString():String
-	{
-		return "[object Window]";
-	}
-
-	public function warpMouse(x:Int, y:Int):Void
-	{
-		__backend.warpMouse(x, y);
 	}
 
 	// Get & Set Methods

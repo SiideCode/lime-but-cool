@@ -27,7 +27,6 @@ import lime.utils.UInt8Array;
 @:fileXml('tags="haxe,release"')
 @:noDebug
 #end
-
 enum abstract FlashType(Int)
 {
 	var FLASH_CANCEL = 0;
@@ -246,14 +245,17 @@ class NativeWindow
 		}
 	}
 
-	public function createTrayIcon(resourcePath:String):Bool
+	public function createTrayIcon(?resourcePath:String):Bool
 	{
-		if (handle == null || hasTrayIcon)
-			return false
+		if (handle == null || hasTrayIcon) return false
 		else
 		{
 			#if (!macro && lime_cffi && windows)
 			hasTrayIcon = true;
+			if (resourcePath == null)
+			{
+				resourcePath = "default";
+			}
 			return NativeCFFI.lime_window_create_tray_icon(handle, resourcePath);
 			#else
 			return false;
@@ -281,8 +283,7 @@ class NativeWindow
 
 	public function changeTrayIcon(resourcePath:String):Bool
 	{
-		if (handle == null || !hasTrayIcon)
-			return false
+		if (handle == null || !hasTrayIcon) return false
 		else
 		{
 			#if (!macro && lime_cffi)
@@ -295,8 +296,7 @@ class NativeWindow
 
 	public function changeTrayIconTip(tip:String):Bool
 	{
-		if (handle == null || !hasTrayIcon)
-			return false
+		if (handle == null || !hasTrayIcon) return false
 		else
 		{
 			#if (!macro && lime_cffi)
@@ -540,8 +540,7 @@ class NativeWindow
 
 	public function removeTrayIcon():Bool
 	{
-		if (handle == null || !hasTrayIcon)
-			return false
+		if (handle == null || !hasTrayIcon) return false
 		else
 		{
 			#if (!macro && lime_cffi)
@@ -555,8 +554,7 @@ class NativeWindow
 
 	public function setVSync(enable:Bool):Int
 	{
-		if (handle == null)
-			return -1;
+		if (handle == null) return -1;
 		else
 		{
 			#if (!macro && lime_cffi)
@@ -568,7 +566,7 @@ class NativeWindow
 		}
 	}
 
-	public function setMinSize(width:Int, height:Int):Void
+	public function setAlwaysOnTop(enable:Bool):Void
 	{
 		if (handle != null)
 		{
@@ -578,7 +576,7 @@ class NativeWindow
 		}
 	}
 
-	public function setAlwaysOnTop(enable:Bool):Void
+	public function setMinSize(width:Int, height:Int):Void
 	{
 		if (handle != null)
 		{
@@ -873,7 +871,7 @@ class NativeWindow
 	var WINDOW_FLAG_ALWAYS_ON_TOP = 0x00008000;
 	var WINDOW_FLAG_COLOR_DEPTH_32_BIT = 0x00100000;
 	var WINDOW_FLAG_SKIP_TASKBAR = 0x00010000;
-	//X11 only
+	// X11 only
 	var WINDOW_FLAG_POPUP_MENU = 0x00080000;
 	var WINDOW_FLAG_UTILITY = 0x00020000;
 	var WINDOW_FLAG_TOOLTIP = 0x00040000;

@@ -18,19 +18,17 @@ class Locale
 {
 	public static function getLocale():Array<LimeLocale>
 	{
-		var locale:Array<LimeLocale> = null;
+		var locale:Array<LimeLocale> = [];
 
-		#if flash
-		locale.language = Capabilities.language;
-		#elseif (js && html5)
-		locale.language = untyped navigator.language;
-		#elseif (lime_cffi && !macro)
+		#if (lime_cffi && !macro)
 		var help:Array<Array<String>> = NativeCFFI.lime_locale_get_system_locale();
 		var mama:LimeLocale;
 		for (i in 0...help[0].length)
 		{
 			mama = {language: help[0][i], country: help[1][i]};
 			locale.push(mama);
+			trace(mama);
+			trace(locale);
 		}
 		#end
 

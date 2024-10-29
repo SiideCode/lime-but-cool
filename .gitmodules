@@ -61,3 +61,6 @@
 [submodule "project/lib/hashlink"]
 	path = project/lib/hashlink
 	url = https://github.com/HaxeFoundation/hashlink
+[submodule "webview"]
+	path = webview
+	url = https://github.com/webview/webview.git

@@ -303,10 +303,6 @@ class System
 			Sys.command("/usr/bin/open", [path]);
 			#elseif linux
 			Sys.command("/usr/bin/xdg-open", [path]);
-			#elseif (js && html5)
-			Browser.window.open(path, "_blank");
-			#elseif flash
-			Lib.getURL(new URLRequest(path), "_blank");
 			#elseif android
 			var openFile = JNI.createStaticMethod("org/haxe/lime/GameActivity", "openFile", "(Ljava/lang/String;)V");
 			openFile(path);
@@ -320,11 +316,7 @@ class System
 	{
 		if (url != null)
 		{
-			#if (js && html5)
-			Browser.window.open(url, target);
-			#elseif flash
-			Lib.getURL(new URLRequest(url), target);
-			#elseif (lime_cffi && !macro)
+			#if (lime_cffi && !macro)
 			NativeCFFI.lime_system_open_url(url);
 			#end
 		}

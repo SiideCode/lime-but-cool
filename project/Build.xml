@@ -63,6 +63,8 @@
 		<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/minimp3/include" />
 		<file name="src/media/containers/MP3.cpp" />
 
+		<!--<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/webview" />-->
+
 		<section if="LIME_CAIRO">
 
 			<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/cairo/include" />

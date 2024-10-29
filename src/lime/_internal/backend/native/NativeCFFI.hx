@@ -279,7 +279,7 @@ class NativeCFFI
 
 	@:cffi private static function lime_system_open_file(path:String):Void;
 
-	@:cffi private static function lime_system_open_url(url:String):Int;
+	@:cffi private static function lime_system_open_url(url:String):Void;
 
 	@:cffi private static function lime_text_event_manager_register(callback:Dynamic, eventObject:Dynamic):Void;
 
@@ -326,6 +326,8 @@ class NativeCFFI
 	@:cffi private static function lime_window_get_id(handle:Dynamic):Int;
 
 	@:cffi private static function lime_window_get_mouse_lock(handle:Dynamic):Bool;
+
+	@:cffi private static function lime_window_get_native_handle(handle:Dynamic):Float;
 
 	@:cffi private static function lime_window_get_opacity(handle:Dynamic):Float;
 
@@ -574,7 +576,7 @@ class NativeCFFI
 	private static var lime_system_get_timer = new cpp.Callable<Void->Float>(cpp.Prime._loadPrime("lime", "lime_system_get_timer", "d", false));
 	private static var lime_locale_get_system_locale = new cpp.Callable<Void->cpp.Object>(cpp.Prime._loadPrime("lime", "lime_locale_get_system_locale", "o", false));
 	private static var lime_system_open_file = new cpp.Callable<String->cpp.Void>(cpp.Prime._loadPrime("lime", "lime_system_open_file", "sv", false));
-	private static var lime_system_open_url = new cpp.Callable<String->Int>(cpp.Prime._loadPrime("lime", "lime_system_open_url", "si", false));
+	private static var lime_system_open_url = new cpp.Callable<String->cpp.Void>(cpp.Prime._loadPrime("lime", "lime_system_open_url", "sv", false));
 	private static var lime_text_event_manager_register = new cpp.Callable<cpp.Object->cpp.Object->cpp.Void>(cpp.Prime._loadPrime("lime",
 		"lime_text_event_manager_register", "oov", false));
 	private static var lime_touch_event_manager_register = new cpp.Callable<cpp.Object->cpp.Object->cpp.Void>(cpp.Prime._loadPrime("lime",
@@ -609,6 +611,7 @@ class NativeCFFI
 	private static var lime_window_get_id = new cpp.Callable<cpp.Object->Int>(cpp.Prime._loadPrime("lime", "lime_window_get_id", "oi", false));
 	private static var lime_window_get_mouse_lock = new cpp.Callable<cpp.Object->Bool>(cpp.Prime._loadPrime("lime", "lime_window_get_mouse_lock", "ob",
 		false));
+	private static var lime_window_get_native_handle = new cpp.Callable<cpp.Object->Float>(cpp.Prime._loadPrime("lime", "lime_window_get_native_handle", "od", false));
 	private static var lime_window_get_opacity = new cpp.Callable<cpp.Object->Float>(cpp.Prime._loadPrime("lime", "lime_window_get_opacity", "od", false));
 	private static var lime_window_get_scale = new cpp.Callable<cpp.Object->Float>(cpp.Prime._loadPrime("lime", "lime_window_get_scale", "od", false));
 	private static var lime_window_get_text_input_enabled = new cpp.Callable<cpp.Object->Bool>(cpp.Prime._loadPrime("lime",
@@ -799,6 +802,7 @@ class NativeCFFI
 	private static var lime_window_get_height = CFFI.load("lime", "lime_window_get_height", 1);
 	private static var lime_window_get_id = CFFI.load("lime", "lime_window_get_id", 1);
 	private static var lime_window_get_mouse_lock = CFFI.load("lime", "lime_window_get_mouse_lock", 1);
+	private static var lime_window_get_native_handle = CFFI.load("lime", "lime_window_get_native_handle", 1);
 	private static var lime_window_get_opacity = CFFI.load("lime", "lime_window_get_opacity", 1);
 	private static var lime_window_get_scale = CFFI.load("lime", "lime_window_get_scale", 1);
 	private static var lime_window_get_text_input_enabled = CFFI.load("lime", "lime_window_get_text_input_enabled", 1);
@@ -1284,7 +1288,7 @@ class NativeCFFI
 
 	@:hlNative("lime", "hl_system_open_file") private static function lime_system_open_file(path:String):Void {}
 
-	@:hlNative("lime", "hl_system_open_url") private static function lime_system_open_url(url:String):Int {}
+	@:hlNative("lime", "hl_system_open_url") private static function lime_system_open_url(url:String):Void {}
 
 	@:hlNative("lime", "hl_text_event_manager_register") private static function lime_text_event_manager_register(callback:Void->Void,
 		eventObject:TextEventInfo):Void {}

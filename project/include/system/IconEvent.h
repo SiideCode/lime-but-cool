@@ -9,8 +9,10 @@ namespace lime
 {
 	enum IconEventType
 	{
-		CONTEXTMENUOPEN,
-		ICONCLICK
+		//WIN_RBUTTONDOWN
+		ICONBUTTONDOWN,
+		//WIN_RBUTTONUP
+		ICONBUTTONUP
 	};
 
 	struct IconEvent

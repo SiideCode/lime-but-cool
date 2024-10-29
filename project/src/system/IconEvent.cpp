@@ -14,7 +14,7 @@ namespace lime {
 	IconEvent::IconEvent () {
 		xClick = 0;
 		yClick = 0;
-		type = CONTEXTMENUOPEN;
+		type = ICONBUTTONDOWN;
 	}
 
 	void IconEvent::Dispatch (IconEvent* event) {
