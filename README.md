@@ -3,6 +3,8 @@
 Lime
 ====
 
+WARNING: REQUIRES https://github.com/SiideCode/openfl TO WORK WITH OPENFL
+
 Lime is a flexible, lightweight layer for Haxe cross-platform developers.
 
 Lime supports native, Flash and HTML5 targets with unified support for:
