@@ -327,7 +327,7 @@ class NativeCFFI
 
 	@:cffi private static function lime_window_get_mouse_lock(handle:Dynamic):Bool;
 
-	@:cffi private static function lime_window_get_native_handle(handle:Dynamic):Float;
+	//@:cffi private static function lime_window_get_native_handle(handle:Dynamic):Float;
 
 	@:cffi private static function lime_window_get_opacity(handle:Dynamic):Float;
 
@@ -611,7 +611,7 @@ class NativeCFFI
 	private static var lime_window_get_id = new cpp.Callable<cpp.Object->Int>(cpp.Prime._loadPrime("lime", "lime_window_get_id", "oi", false));
 	private static var lime_window_get_mouse_lock = new cpp.Callable<cpp.Object->Bool>(cpp.Prime._loadPrime("lime", "lime_window_get_mouse_lock", "ob",
 		false));
-	private static var lime_window_get_native_handle = new cpp.Callable<cpp.Object->Float>(cpp.Prime._loadPrime("lime", "lime_window_get_native_handle", "od", false));
+	//private static var lime_window_get_native_handle = new cpp.Callable<cpp.Object->Float>(cpp.Prime._loadPrime("lime", "lime_window_get_native_handle", "od", false));
 	private static var lime_window_get_opacity = new cpp.Callable<cpp.Object->Float>(cpp.Prime._loadPrime("lime", "lime_window_get_opacity", "od", false));
 	private static var lime_window_get_scale = new cpp.Callable<cpp.Object->Float>(cpp.Prime._loadPrime("lime", "lime_window_get_scale", "od", false));
 	private static var lime_window_get_text_input_enabled = new cpp.Callable<cpp.Object->Bool>(cpp.Prime._loadPrime("lime",
@@ -802,7 +802,7 @@ class NativeCFFI
 	private static var lime_window_get_height = CFFI.load("lime", "lime_window_get_height", 1);
 	private static var lime_window_get_id = CFFI.load("lime", "lime_window_get_id", 1);
 	private static var lime_window_get_mouse_lock = CFFI.load("lime", "lime_window_get_mouse_lock", 1);
-	private static var lime_window_get_native_handle = CFFI.load("lime", "lime_window_get_native_handle", 1);
+	//private static var lime_window_get_native_handle = CFFI.load("lime", "lime_window_get_native_handle", 1);
 	private static var lime_window_get_opacity = CFFI.load("lime", "lime_window_get_opacity", 1);
 	private static var lime_window_get_scale = CFFI.load("lime", "lime_window_get_scale", 1);
 	private static var lime_window_get_text_input_enabled = CFFI.load("lime", "lime_window_get_text_input_enabled", 1);

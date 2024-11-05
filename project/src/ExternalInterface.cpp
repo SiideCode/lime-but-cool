@@ -3401,11 +3401,12 @@ namespace lime {
 
 	}
 
-	double lime_window_get_native_handle(value window)
-	{
-		Window *targetWnd = (Window*) val_data(window);
-		return (uintptr_t)targetWnd->GetNativeHandle();
-	}
+// TODO: return if needed, just cast longptr_t to float
+	//double lime_window_get_native_handle(value window)
+	//{
+	//	Window *targetWnd = (Window*) val_data(window);
+	//	return (uintptr_t)targetWnd->GetNativeHandle();
+	//}
 
 
 	value lime_window_get_context_type (value window) {
@@ -4209,7 +4210,7 @@ namespace lime {
 	DEFINE_PRIME1 (lime_window_get_height);
 	DEFINE_PRIME1 (lime_window_get_id);
 	DEFINE_PRIME1 (lime_window_get_mouse_lock);
-	DEFINE_PRIME1 (lime_window_get_native_handle);
+	//DEFINE_PRIME1 (lime_window_get_native_handle);
 	DEFINE_PRIME1 (lime_window_get_scale);
 	DEFINE_PRIME1 (lime_window_get_text_input_enabled);
 	DEFINE_PRIME1 (lime_window_get_width);
