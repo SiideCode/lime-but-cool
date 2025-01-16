@@ -21,9 +21,11 @@
 	<set name="LIME_MBEDTLS" value="1" unless="emscripten || winrt" />
 	<!-- <set name="LIME_NEKO" value="1" if="linux" /> -->
 	<set name="LIME_OGG" value="1" />
-	<set name="LIME_OPENALSOFT" value="1" if="windows || linux || mac || android" unless="static_link" />
+	<set name="LIME_OPENALSOFT" value="1" if="windows || linux || mac || android"
+		unless="static_link" />
 	<set name="LIME_OPENAL" value="1" if="iphone || webassembly || tvos" />
-	<set name="LIME_MOJOAL" value="1" if="switch || static_link || winrt || mojoal" unless="LIME_OPENAL" />
+	<set name="LIME_MOJOAL" value="1" if="switch || static_link || winrt || mojoal"
+		unless="LIME_OPENAL" />
 	<unset name="LIME_OPENALSOFT" if="LIME_MOJOAL" />
 	<set name="LIME_OPENAL" value="1" if="LIME_OPENALSOFT" />
 	<set name="LIME_OPENAL" value="1" if="LIME_MOJOAL" />
@@ -35,7 +37,8 @@
 	<set name="LIME_SDL_ANGLE" value="1" if="windows LIME_SDL_ANGLE" unless="static_link" />
 	<set name="LIME_SDL_ANGLE" value="1" if="windows angle" unless="static_link" />
 	<set name="LIME_SDL_ANGLE" value="1" if="winrt" />
-	<set name="LIME_TINYFILEDIALOGS" value="1" if="windows || mac || linux" unless="winrt || emscripten" />
+	<set name="LIME_TINYFILEDIALOGS" value="1" if="windows || mac || linux"
+		unless="winrt || emscripten" />
 	<set name="LIME_VORBIS" value="1" />
 	<!-- <set name="LIME_VPX" value="1" />
 	<set name="LIME_WEBM" value="1" /> -->
@@ -63,14 +66,17 @@
 		<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/minimp3/include" />
 		<file name="src/media/containers/MP3.cpp" />
 
-		<!--<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/webview" />-->
+		<!--<compilerflag
+		value="-I${NATIVE_TOOLKIT_PATH}/webview" />-->
 
 		<section if="LIME_CAIRO">
 
 			<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/cairo/include" />
-			<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/cairo/include/configs/default/" unless="windows || mac || linux" />
+			<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/cairo/include/configs/default/"
+				unless="windows || mac || linux" />
 			<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/cairo/include/configs/linux/" if="linux" />
-			<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/cairo/include/configs/windows/" if="windows" />
+			<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/cairo/include/configs/windows/"
+				if="windows" />
 			<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/cairo/include/configs/mac/" if="mac" />
 			<compilerflag value="-DLIME_CAIRO" />
 			<compilerflag value="-DHAVE_CONFIG_H" />
@@ -180,7 +186,8 @@
 
 		<section if="LIME_OPENAL">
 
-			<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/openal/include/" unless="LIME_MOJOAL || emscripten" />
+			<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/openal/include/"
+				unless="LIME_MOJOAL || emscripten" />
 			<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/mojoal/" if="LIME_MOJOAL" />
 			<compilerflag value="-DLIME_OPENAL" />
 			<compilerflag value="-DLIME_OPENALSOFT" if="LIME_OPENALSOFT" />
@@ -195,7 +202,9 @@
 		<section if="LIME_OPENGL">
 
 			<compilerflag value="-DLIME_OPENGL" />
-			<compilerflag value="-I${DEVELOPER_DIR}/Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS${TVOS_VER}.sdk/" if="tvos" />
+			<compilerflag
+				value="-I${DEVELOPER_DIR}/Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS${TVOS_VER}.sdk/"
+				if="tvos" />
 
 			<file name="src/graphics/opengl/OpenGLBindings.cpp" />
 
@@ -222,11 +231,15 @@
 
 			<section unless="emscripten">
 
-				<!--<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/sdlmixer/include" />-->
+				<!--<compilerflag
+				value="-I${NATIVE_TOOLKIT_PATH}/sdlmixer/include" />-->
 				<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/sdl/include/" />
-				<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/sdl/include/configs/default/" unless="windows || mac || linux || rpi" />
-				<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/sdl/include/configs/linux/" if="linux" unless="rpi" />
-				<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/sdl/include/configs/windows/" if="windows" unless="winrt" />
+				<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/sdl/include/configs/default/"
+					unless="windows || mac || linux || rpi" />
+				<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/sdl/include/configs/linux/" if="linux"
+					unless="rpi" />
+				<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/sdl/include/configs/windows/"
+					if="windows" unless="winrt" />
 				<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/sdl/include/configs/mac/" if="mac" />
 				<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/sdl/include/configs/rpi/" if="rpi" />
 				<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/sdl/include/configs/winrt/" if="winrt" />
@@ -242,7 +255,8 @@
 				<compilerflag value="-I/opt/vc/include/interface/vmcs_host/linux" />
 				<compilerflag value="-lbrcmGLESv2" />
 				<compilerflag value="-lbrcmEGL" />
-				<compilerflag value="-Wl,--no-undefined -lm -L/opt/vc/lib -lbcm_host -ldl -lpthread -lrt" />
+				<compilerflag
+					value="-Wl,--no-undefined -lm -L/opt/vc/lib -lbcm_host -ldl -lpthread -lrt" />
 
 			</section>
 
@@ -260,7 +274,8 @@
 			<file name="src/backend/sdl/SDLSystem.cpp" />
 			<file name="src/backend/sdl/SDLWindow.cpp" />
 
-			<!--<file name="src/media/sdlaudio/SDLAudioBindings.cpp" />-->
+			<!--<file
+			name="src/media/sdlaudio/SDLAudioBindings.cpp" />-->
 
 		</section>
 
@@ -323,7 +338,7 @@
 		<file name="src/ui/TextEvent.cpp" />
 		<file name="src/ui/TouchEvent.cpp" />
 		<file name="src/ui/WindowEvent.cpp" />
-		<file name="src/system/IconEvent.cpp" if="windows"/>
+		<file name="src/system/IconEvent.cpp" if="windows" />
 		<file name="src/utils/ArrayBufferView.cpp" />
 		<file name="src/utils/Bytes.cpp" />
 
@@ -368,7 +383,8 @@
 	<set name="LIBSUFFIX" value="${HX_TARGET_SUFFIX}" if="HX_TARGET_SUFFIX" />
 	<set name="LIBSUFFIX" value="${LIBEXTRA}" unless="LIBSUFFIX" />
 
-	<target id="lime" output="${LIBPREFIX}lime${DEBUGEXTRA}${LIBSUFFIX}" tool="linker" toolid="${STD_MODULE_LINK}">
+	<target id="lime" output="${LIBPREFIX}lime${DEBUGEXTRA}${LIBSUFFIX}" tool="linker"
+		toolid="${STD_MODULE_LINK}">
 
 		<outdir name="${OUTPUT_DIR}/${BINDIR}" />
 
@@ -397,7 +413,8 @@
 		<files id="native-toolkit-vpx" if="LIME_VPX" />
 		<files id="native-toolkit-webm" if="LIME_WEBM" />
 		<files id="native-toolkit-zlib" if="LIME_ZLIB" />
-		<!--<files id="native-toolkit-sdl-mixer" />-->
+		<!--<files
+		id="native-toolkit-sdl-mixer" />-->
 
 		<section unless="static_link">
 

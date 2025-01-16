@@ -1,5 +1,5 @@
-//#define MINIMP3_NO_STDIO
-//#define MINIMP3_FLOAT_OUTPUT
+// #define MINIMP3_NO_STDIO
+// #define MINIMP3_FLOAT_OUTPUT
 #define MINIMP3_ONLY_MP3
 #define MINIMP3_IMPLEMENTATION
 #ifdef MINIMP3_FLOAT_OUTPUT
@@ -9,18 +9,18 @@
 #endif
 #include <minimp3_ex.h>
 #include <media/containers/MP3.h>
-//no std i guess.
+// no std i guess.
 #include <system/System.h>
 
 namespace lime
 {
-	bool MP3::Decode (Resource *resource, AudioBuffer *audioBuffer)
+	bool MP3::Decode(Resource *resource, AudioBuffer *audioBuffer)
 	{
 		mp3dec_t mp3dec;
 		mp3dec_file_info_t mp3info;
 		if (resource->data)
 		{
-			int result = mp3dec_load_buf(&mp3dec, resource->data->b, resource->data->length/*-1*/, &mp3info, NULL, NULL);
+			int result = mp3dec_load_buf(&mp3dec, resource->data->b, resource->data->length /*-1*/, &mp3info, NULL, NULL);
 			LOG_SOUND("well, it loaded, the return code is %d ", result);
 			if (result < 0)
 			{
@@ -45,16 +45,16 @@ namespace lime
 
 		if (mp3info.samples != 0)
 		{
-		    audioBuffer->data->Resize(mp3info.samples * sizeof(mp3d_sample_t));
-		    audioBuffer->sampleRate = mp3info.hz;
-		    audioBuffer->bitsPerSample = SAMPLE_BITS;
-		    audioBuffer->channels = mp3info.channels;
+			audioBuffer->data->Resize(mp3info.samples * sizeof(mp3d_sample_t));
+			audioBuffer->sampleRate = mp3info.hz;
+			audioBuffer->bitsPerSample = SAMPLE_BITS;
+			audioBuffer->channels = mp3info.channels;
 		}
 		else
 		{
-		    LOG_SOUND("wowsers, turns out it's not an mp3");
-		    return false;
-                }
+			LOG_SOUND("wowsers, turns out it's not an mp3");
+			return false;
+		}
 
 		LOG_SOUND("resized data buffer to %zd ", mp3info.samples * sizeof(mp3d_sample_t));
 

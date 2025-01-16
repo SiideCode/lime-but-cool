@@ -64,3 +64,11 @@
 [submodule "webview"]
 	path = webview
 	url = https://github.com/webview/webview.git
+[submodule "cef"]
+	path = cef
+	url = https://github.com/chromiumembedded/cef.git
+	branch = 6834
+[submodule "project/lib/cef"]
+	path = project/lib/cef
+	url = https://github.com/chromiumembedded/cef.git
+	branch = 6834
