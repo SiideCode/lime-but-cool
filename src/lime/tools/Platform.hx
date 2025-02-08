@@ -23,4 +23,10 @@ enum abstract Platform(String)
 	var EMSCRIPTEN = "emscripten";
 	var TVOS = "tvos";
 	var CUSTOM = null;
+
+	@:op(A == B) @:commutative
+	private inline function equalsHostPlatform(hostPlatform:hxp.HostPlatform):Bool
+	{
+		return this == hostPlatform;
+	}
 }

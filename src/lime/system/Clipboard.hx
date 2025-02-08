@@ -3,12 +3,16 @@ package lime.system;
 import lime._internal.backend.native.NativeCFFI;
 import lime.app.Application;
 import lime.app.Event;
+import lime.system.CFFI;
 #if flash
 import flash.desktop.Clipboard as FlashClipboard;
 #elseif (js && html5)
 import lime._internal.backend.html5.HTML5Window;
 #end
 
+/**
+	Reads and writes text on the system clipboard.
+**/
 #if !lime_debug
 @:fileXml('tags="haxe,release"')
 @:noDebug
@@ -17,8 +21,16 @@ import lime._internal.backend.html5.HTML5Window;
 @:access(lime.ui.Window)
 class Clipboard
 {
+	/**
+		Dispatched when the clipboard text changes.
+	**/
 	public static var onUpdate = new Event<Void->Void>();
+
+	/**
+		The text currently stored in the clipboard.
+	**/
 	public static var text(get, set):String;
+
 	private static var _text:String;
 	@:noCompletion private static var __updated = false;
 
@@ -28,20 +40,14 @@ class Clipboard
 		_text = null;
 
 		#if (lime_cffi && !macro)
-		#if hl
-		var utf = NativeCFFI.lime_clipboard_get_text();
-		if (utf != null)
-		{
-			_text = @:privateAccess String.fromUTF8(utf);
-		}
-		#else
-		_text = NativeCFFI.lime_clipboard_get_text();
-		#end
+		_text = CFFI.stringValue(NativeCFFI.lime_clipboard_get_text());
 		#elseif flash
 		if (FlashClipboard.generalClipboard.hasFormat(TEXT_FORMAT))
 		{
 			_text = FlashClipboard.generalClipboard.getData(TEXT_FORMAT);
 		}
+		#elseif (js || html5)
+		_text = cacheText;
 		#end
 		__updated = true;
 
