@@ -70,39 +70,37 @@
 		value="-I${NATIVE_TOOLKIT_PATH}/webview" />-->
 
 		<section if="LIME_CAIRO">
+
+			<
+			<
+			<
+			<
+			<
+			<
+			< HEAD
 			<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/cairo/include" />
-			<compilerflag
-				value="-I${NATIVE_TOOLKIT_PATH}/cairo/include/configs/default/"
+			<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/cairo/include/configs/default/"
 				unless="windows || mac || linux" />
-			<compilerflag
-				value="-I${NATIVE_TOOLKIT_PATH}/cairo/include/configs/linux/" if="linux" />
-			<compilerflag
-				value="-I${NATIVE_TOOLKIT_PATH}/cairo/include/configs/windows/"
+			<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/cairo/include/configs/linux/" if="linux" />
+			<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/cairo/include/configs/windows/"
 				if="windows" />
-			<compilerflag
-				value="-I${NATIVE_TOOLKIT_PATH}/cairo/include/configs/mac/" if="mac" /> ======= <compilerflag
-				value="-I${NATIVE_TOOLKIT_PATH}/custom/cairo/src/" />
-			<compilerflag
-				value="-I${NATIVE_TOOLKIT_PATH}/custom/cairo/configs/default/"
+			<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/cairo/include/configs/mac/" if="mac" />
+			=======
+			<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/custom/cairo/src/" />
+			<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/custom/cairo/configs/default/"
 				unless="windows || mac || linux" />
-			<compilerflag
-				value="-I${NATIVE_TOOLKIT_PATH}/custom/cairo/configs/linux/" if="linux" />
-			<compilerflag
-				value="-I${NATIVE_TOOLKIT_PATH}/custom/cairo/configs/windows/"
+			<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/custom/cairo/configs/linux/" if="linux" />
+			<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/custom/cairo/configs/windows/"
 				if="windows" />
-			<compilerflag
-				value="-I${NATIVE_TOOLKIT_PATH}/custom/cairo/configs/mac/" if="mac" />
-			<compilerflag
-				value="-I${NATIVE_TOOLKIT_PATH}/cairo/src/" />
+			<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/custom/cairo/configs/mac/" if="mac" />
+			<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/cairo/src/" />
+			>>>>>>> 69bbcaea2708567f501eaf89d29cb2591de18b79
 			<compilerflag value="-DLIME_CAIRO" />
-			<compilerflag
-				value="-DHAVE_CONFIG_H" />
-			<compilerflag value="-DCAIRO_WIN32_STATIC_BUILD"
-				if="windows" />
+			<compilerflag value="-DHAVE_CONFIG_H" />
+			<compilerflag value="-DCAIRO_WIN32_STATIC_BUILD" if="windows" />
 			<compilerflag value="-DCAIRO_HAS_FT_FONT" />
 
-			<file
-				name="src/graphics/cairo/CairoBindings.cpp" />
+			<file name="src/graphics/cairo/CairoBindings.cpp" />
 
 		</section>
 
