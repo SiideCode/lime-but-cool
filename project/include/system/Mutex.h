@@ -13,9 +13,9 @@ namespace lime {
 			Mutex ();
 			~Mutex ();
 
-			bool Lock () const;
-			bool TryLock () const;
-			bool Unlock () const;
+			bool Lock ();
+			bool TryLock ();
+			bool Unlock ();
 
 		private:
 

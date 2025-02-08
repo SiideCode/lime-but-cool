@@ -371,12 +371,7 @@ class TVOSPlatform extends PlatformTarget
 	{
 		var path = targetDirectory + "/" + project.app.file + "/haxe/Build.hxml";
 
-		// try to use the existing .hxml file. however, if the project file was
-		// modified more recently than the .hxml, then the .hxml cannot be
-		// considered valid anymore. it may cause errors in editors like vscode.
-		if (FileSystem.exists(path)
-			&& (project.projectFilePath == null || !FileSystem.exists(project.projectFilePath)
-				|| (FileSystem.stat(path).mtime.getTime() > FileSystem.stat(project.projectFilePath).mtime.getTime())))
+		if (FileSystem.exists(path))
 		{
 			return File.getContent(path);
 		}
@@ -633,7 +628,7 @@ class TVOSPlatform extends PlatformTarget
 						fileName = "lib" + fileName;
 					}
 
-					copyIfNewer(dependency.path, projectDirectory + "/lib/" + arch + "/" + fileName);
+					System.copyIfNewer(dependency.path, projectDirectory + "/lib/" + arch + "/" + fileName);
 				}
 			}
 		}

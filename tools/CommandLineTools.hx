@@ -231,31 +231,31 @@ class CommandLineTools
 					switch (targetName)
 					{
 						case "cpp":
-							target = System.hostPlatform;
+							target = cast System.hostPlatform;
 							targetFlags.set("cpp", "");
 
 						case "neko":
-							target = System.hostPlatform;
+							target = cast System.hostPlatform;
 							targetFlags.set("neko", "");
 
 						case "hl", "hashlink":
-							target = System.hostPlatform;
+							target = cast System.hostPlatform;
 							targetFlags.set("hl", "");
 
 						case "cppia":
-							target = System.hostPlatform;
+							target = cast System.hostPlatform;
 							targetFlags.set("cppia", "");
 
 						case "java":
-							target = System.hostPlatform;
+							target = cast System.hostPlatform;
 							targetFlags.set("java", "");
 
 						case "nodejs":
-							target = System.hostPlatform;
+							target = cast System.hostPlatform;
 							targetFlags.set("nodejs", "");
 
 						case "cs":
-							target = System.hostPlatform;
+							target = cast System.hostPlatform;
 							targetFlags.set("cs", "");
 
 						case "iphone", "iphoneos":
@@ -485,25 +485,28 @@ class CommandLineTools
 				}
 
 			case MAC:
-				if (System.hostArchitecture == X64)
-				{
-					untyped $loader.path = $array(path + "Mac64/", $loader.path);
-				}
-				else if (System.hostArchitecture == ARM64)
-				{
-					untyped $loader.path = $array(path + "MacArm64/", $loader.path);
-				}
+				// if (System.hostArchitecture == X64) {
+
+				untyped $loader.path = $array(path + "Mac64/", $loader.path);
+
+			// } else {
+
+			//	untyped $loader.path = $array (path + "Mac/", $loader.path);
+
+			// }
 
 			case LINUX:
 				var arguments = Sys.args();
+				var raspberryPi = false;
 
-				if (System.hostArchitecture == ARMV7 )
+				for (argument in arguments)
 				{
-					untyped $loader.path = $array(path + "LinuxArm/", $loader.path);
+					if (argument == "-rpi") raspberryPi = true;
 				}
-				else if (System.hostArchitecture == ARM64)
+
+				if (raspberryPi || System.hostArchitecture == ARMV6 || System.hostArchitecture == ARMV7)
 				{
-					untyped $loader.path = $array(path + "LinuxArm64/", $loader.path);
+					untyped $loader.path = $array(path + "RPi/", $loader.path);
 				}
 				else if (System.hostArchitecture == X64)
 				{
@@ -930,7 +933,6 @@ class CommandLineTools
 			Log.println("  \x1b[1mjava\x1b[0m -- Alias for host platform (using \x1b[1m-java\x1b[0m)");
 			Log.println("  \x1b[1mcs\x1b[0m -- Alias for host platform (using \x1b[1m-cs\x1b[0m)");
 			Log.println("  \x1b[1mhl/hashlink\x1b[0m -- Alias for host platform (using \x1b[1m-hl\x1b[0m)");
-			Log.println("  \x1b[1mhlc\x1b[0m -- Alias for host platform (using \x1b[1m-hlc\x1b[0m)");
 			#if (lime >= "7.6.0")
 			// Log.println("  \x1b[1mcppia\x1b[0m -- Alias for host platform (using \x1b[1m-cppia\x1b[0m)");
 			#end
@@ -947,12 +949,6 @@ class CommandLineTools
 		Log.println("");
 		Log.println(" " + Log.accentColor + "Options:" + Log.resetColor);
 		Log.println("");
-
-		if (command == "setup")
-		{
-			Log.println("  \x1b[1m-cli\x1b[0;3m/\x1b[0m\x1b[1m-alias\x1b[0m -- Set up " + defaultLibraryName + " alias only, skipping haxelib installs");
-			Log.println("  \x1b[1m-noalias\x1b[0m -- Do not set up " + defaultLibraryName + " alias");
-		}
 
 		if (isBuildCommand)
 		{
@@ -996,13 +992,12 @@ class CommandLineTools
 		if (isBuildCommand)
 		{
 			Log.println("  \x1b[3m(windows|mac|linux|android)\x1b[0m \x1b[1m-static\x1b[0m -- Compile as a static C++ executable");
-			Log.println("  \x1b[3m(windows|mac|linux)\x1b[0m \x1b[1m-x86_32\x1b[0m -- Compile for x86_32 instead of the OS default");
-			Log.println("  \x1b[3m(windows|mac|linux)\x1b[0m \x1b[1m-x86_64\x1b[0m -- Compile for x86_64 instead of the OS default");
+			Log.println("  \x1b[3m(windows|mac|linux)\x1b[0m \x1b[1m-32\x1b[0m -- Compile for 32-bit instead of the OS default");
+			Log.println("  \x1b[3m(windows|mac|linux)\x1b[0m \x1b[1m-64\x1b[0m -- Compile for 64-bit instead of the OS default");
 			Log.println("  \x1b[3m(ios|android)\x1b[0m \x1b[1m-armv6\x1b[0m -- Compile for ARMv6 instead of the OS defaults");
 			Log.println("  \x1b[3m(ios|android)\x1b[0m \x1b[1m-armv7\x1b[0m -- Compile for ARMv7 instead of the OS defaults");
 			Log.println("  \x1b[3m(ios|android)\x1b[0m \x1b[1m-armv7s\x1b[0m -- Compile for ARMv7s instead of the OS defaults");
-			Log.println("  \x1b[3m(mac|ios|android)\x1b[0m \x1b[1m-arm64\x1b[0m -- Compile for ARM64 instead of the OS defaults");
-			Log.println("  \x1b[3m(ios)\x1b[0m \x1b[1m-nosign\x1b[0m -- Compile executable, but skip codesigning");
+			Log.println("  \x1b[3m(ios)\x1b[0m \x1b[1m-arm64\x1b[0m -- Compile for ARM64 instead of the OS defaults");
 		}
 
 		if (isProjectCommand)
@@ -1045,8 +1040,7 @@ class CommandLineTools
 			Log.println("  \x1b[3m(windows|mac|linux)\x1b[0m \x1b[1m-java\x1b[0m -- Build for Java instead of C++");
 			Log.println("  \x1b[3m(windows|mac|linux)\x1b[0m \x1b[1m-nodejs\x1b[0m -- Build for Node.js instead of C++");
 			Log.println("  \x1b[3m(windows|mac|linux)\x1b[0m \x1b[1m-cs\x1b[0m -- Build for C# instead of C++");
-			Log.println("  \x1b[3m(windows|mac|linux)\x1b[0m \x1b[1m-hl\x1b[0m -- Build for HashLink/JIT instead of C++");
-			Log.println("  \x1b[3m(windows|mac|linux)\x1b[0m \x1b[1m-hlc\x1b[0m -- Build for HashLink/C instead of C++");
+			Log.println("  \x1b[3m(windows|mac|linux)\x1b[0m \x1b[1m-hl\x1b[0m -- Build for HashLink instead of C++");
 			#if (lime >= "7.6.0")
 			// Log.println("  \x1b[3m(windows|mac|linux)\x1b[0m \x1b[1m-cppia\x1b[0m -- Build for CPPIA instead of C++");
 			#end
@@ -1486,41 +1480,31 @@ class CommandLineTools
 		switch (targetName)
 		{
 			case "cpp":
-				target = System.hostPlatform;
+				target = cast System.hostPlatform;
 				targetFlags.set("cpp", "");
 
-				if (target == Platform.MAC)
-				{
-					overrides.haxedefs.set("macos", "");
-				}
-
 			case "neko":
-				target = System.hostPlatform;
+				target = cast System.hostPlatform;
 				targetFlags.set("neko", "");
 
 			case "hl", "hashlink":
-				target = System.hostPlatform;
-				targetFlags.set("hl", "");
-
-			case "hlc":
 				target = cast System.hostPlatform;
 				targetFlags.set("hl", "");
-				targetFlags.set("hlc", "");
 
 			case "cppia":
-				target = System.hostPlatform;
+				target = cast System.hostPlatform;
 				targetFlags.set("cppia", "");
 
 			case "java":
-				target = System.hostPlatform;
+				target = cast System.hostPlatform;
 				targetFlags.set("java", "");
 
 			case "nodejs":
-				target = System.hostPlatform;
+				target = cast System.hostPlatform;
 				targetFlags.set("nodejs", "");
 
 			case "cs":
-				target = System.hostPlatform;
+				target = cast System.hostPlatform;
 				targetFlags.set("cs", "");
 
 			case "iphone", "iphoneos":
@@ -1704,11 +1688,6 @@ class CommandLineTools
 					Log.error("Could not process \"" + projectFile + "\"");
 					return null;
 				}
-			}
-
-			if (project != null)
-			{
-				project.projectFilePath = projectFile;
 			}
 		}
 
@@ -2223,11 +2202,11 @@ class CommandLineTools
 						}
 						catch (e:Dynamic) {}
 					}
-					else if (argument == "-64" || argument == "-x86_64")
+					else if (argument == "-64")
 					{
 						overrides.architectures.push(Architecture.X64);
 					}
-					else if (argument == "-32" || argument == "-x86_32")
+					else if (argument == "-32")
 					{
 						overrides.architectures.push(Architecture.X86);
 					}

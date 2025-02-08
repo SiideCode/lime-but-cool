@@ -2,7 +2,6 @@ package lime._internal.format;
 
 import haxe.io.Bytes;
 import lime._internal.backend.native.NativeCFFI;
-import lime.utils.UInt8Array;
 #if flash
 import flash.utils.CompressionAlgorithm;
 import flash.utils.ByteArray;
@@ -25,16 +24,6 @@ class LZMA
 		if (data == null) return null;
 		return @:privateAccess new Bytes(data.length, data.b);
 		#end
-		#elseif js
-		var data = untyped #if haxe4 js.Syntax.code #else __js__ #end ("LZMA.compress")(new UInt8Array(bytes.getData()), 5);
-		if ((data is String))
-		{
-			return Bytes.ofString(data);
-		}
-		else
-		{
-			return Bytes.ofData(cast data);
-		}
 		#elseif flash
 		var byteArray:ByteArray = cast bytes.getData();
 
@@ -58,16 +47,6 @@ class LZMA
 		if (data == null) return null;
 		return @:privateAccess new Bytes(data.length, data.b);
 		#end
-		#elseif js
-		var data = untyped #if haxe4 js.Syntax.code #else __js__ #end ("LZMA.decompress")(new UInt8Array(bytes.getData()));
-		if ((data is String))
-		{
-			return Bytes.ofString(data);
-		}
-		else
-		{
-			return Bytes.ofData(cast data);
-		}
 		#elseif flash
 		var byteArray:ByteArray = cast bytes.getData();
 

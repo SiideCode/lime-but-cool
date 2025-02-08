@@ -30,13 +30,6 @@ class IOSHelper
 		else
 		{
 			commands.push("build");
-			if (project.targetFlags.exists("nosign"))
-			{
-				commands.push("CODE_SIGN_IDENTITY=\"\"");
-				commands.push("CODE_SIGNING_REQUIRED=\"NO\"");
-				commands.push("CODE_SIGN_ENTITLEMENTS=\"\"");
-				commands.push("CODE_SIGNING_ALLOWED=\"NO\"");
-			}
 		}
 
 		if (additionalArguments != null)
@@ -128,7 +121,7 @@ class IOSHelper
 
 		if (project.targetFlags.exists("simulator"))
 		{
-			if (project.targetFlags.exists("i386") || project.targetFlags.exists("32") || project.targetFlags.exists("x86_32"))
+			if (project.targetFlags.exists("i386") || project.targetFlags.exists("32"))
 			{
 				commands.push("-arch");
 				commands.push("i386");
@@ -324,12 +317,6 @@ class IOSHelper
 
 			var currentDeviceID = XCodeHelper.getSimulatorID(project);
 
-			if (Log.verbose)
-			{
-				var currentSimulatorName = XCodeHelper.getSimulatorName(project);
-				Log.info("Using iOS simulator: " + currentSimulatorName);
-			}
-
 			try
 			{
 				System.runProcess("", "open", ["-Ra", "iOS Simulator"], true, false);
@@ -359,44 +346,21 @@ class IOSHelper
 				applicationPath = workingDirectory + "/build/" + configuration + "-iphoneos/" + project.app.file + ".app";
 			}
 
-			var xcodeVersion = Std.parseFloat(getXcodeVersion());
-			if (!Math.isNaN(xcodeVersion) && xcodeVersion >= 16) {
-				// ios-deploy doesn't work with newer iOS SDKs where it can't
-				// find DeveloperDiskImage.dmg. however, Xcode 16 adds new
-				// commands for installing and launching apps on connected
-				// devices, so we'll prefer those, if available.
-				var listDevicesOutput = System.runProcess("", "xcrun", ["devicectl", "list", "devices", "--hide-default-columns", "--columns", "Identifier", "--filter", "Platform == 'iOS' AND State == 'connected'"]);
-				var deviceUUID:String = null;
-				var ready = false;
-				for (line in listDevicesOutput.split("\n")) {
-					if (!ready) {
-						ready = StringTools.startsWith(line, "----");
-						continue;
-					}
-					deviceUUID = line;
-					break;
-				}
-				if (deviceUUID == null || deviceUUID.length == 0) {
-					Log.error("No device connected");
-					return;
-				}
-				System.runCommand("", "xcrun", ["devicectl", "device", "install", "app", "--device", deviceUUID, FileSystem.fullPath(applicationPath)]);
-				System.runCommand("", "xcrun", ["devicectl", "device", "process", "launch", "--console", "--device", deviceUUID, project.meta.packageName]);
-			} else {
-				var templatePaths = [
-					Path.combine(Haxelib.getPath(new Haxelib(#if lime "lime" #else "hxp" #end)), #if lime "templates" #else "" #end)
-				].concat(project.templatePaths);
-				var launcher = System.findTemplate(templatePaths, "bin/ios-deploy");
-				Sys.command("chmod", ["+x", launcher]);
+			var templatePaths = [
+				Path.combine(Haxelib.getPath(new Haxelib(#if lime "lime" #else "hxp" #end)), #if lime "templates" #else "" #end)
+			].concat(project.templatePaths);
+			var launcher = System.findTemplate(templatePaths, "bin/ios-deploy");
+			Sys.command("chmod", ["+x", launcher]);
 
-				System.runCommand("", launcher, [
-					"install",
-					"--noninteractive",
-					"--debug",
-					"--bundle",
-					FileSystem.fullPath(applicationPath)
-				]);
-			}
+			// var xcodeVersion = getXcodeVersion ();
+
+			System.runCommand("", launcher, [
+				"install",
+				"--noninteractive",
+				"--debug",
+				"--bundle",
+				FileSystem.fullPath(applicationPath)
+			]);
 		}
 	}
 

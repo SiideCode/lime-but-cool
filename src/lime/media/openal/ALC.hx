@@ -2,7 +2,6 @@ package lime.media.openal;
 
 #if (!lime_doc_gen || lime_openal)
 import lime._internal.backend.native.NativeCFFI;
-import lime.system.CFFI;
 import lime.system.CFFIPointer;
 
 #if !lime_debug
@@ -76,13 +75,12 @@ class ALC
 
 	public static function getContextsDevice(context:ALContext):ALDevice
 	{
-		#if (lime_cffi && lime_openal && !macro)
-		var handle:Dynamic = NativeCFFI.lime_alc_get_contexts_device(context);
+		#if (lime_cffi && lime_openal && !macro) #if !hl var handle:Dynamic = NativeCFFI.lime_alc_get_contexts_device(context);
 
 		if (handle != null)
 		{
 			return new ALDevice(handle);
-		}
+		} #else #end
 		#end
 
 		return null;
@@ -146,7 +144,10 @@ class ALC
 	{
 		#if (lime_cffi && lime_openal && !macro)
 		var result = NativeCFFI.lime_alc_get_string(device, param);
-		return CFFI.stringValue(result);
+		#if hl
+		var result = @:privateAccess String.fromUTF8(result);
+		#end
+		return result;
 		#else
 		return null;
 		#end

@@ -14,6 +14,7 @@ namespace lime {
 			static int GetNumAxes (int id);
 			static int GetNumButtons (int id);
 			static int GetNumHats (int id);
+			static int GetNumTrackballs (int id);
 
 	};
 

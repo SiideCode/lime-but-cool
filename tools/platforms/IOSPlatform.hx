@@ -246,7 +246,6 @@ class IOSPlatform extends PlatformTarget
 		var armv7 = false;
 		var armv7s = false;
 		var arm64 = false;
-		var i386 = false;
 		var architectures = project.architectures;
 
 		if (architectures == null || architectures.length == 0)
@@ -256,7 +255,7 @@ class IOSPlatform extends PlatformTarget
 
 		if (project.config.getString("ios.device", "universal") == "universal" || project.config.getString("ios.device") == "iphone")
 		{
-			if (project.config.getFloat("ios.deployment", 13) < 5)
+			if (project.config.getFloat("ios.deployment", 9) < 5)
 			{
 				ArrayTools.addUnique(architectures, Architecture.ARMV6);
 			}
@@ -278,9 +277,6 @@ class IOSPlatform extends PlatformTarget
 				case ARM64:
 					valid_archs.push("arm64");
 					arm64 = true;
-				case X86:
-					valid_archs.push("i386");
-					i386 = true;
 				default:
 			}
 		}
@@ -288,6 +284,7 @@ class IOSPlatform extends PlatformTarget
 		context.CURRENT_ARCHS = "( " + valid_archs.join(",") + ") ";
 
 		valid_archs.push("x86_64");
+		valid_archs.push("i386");
 
 		context.VALID_ARCHS = valid_archs.join(" ");
 		context.THUMB_SUPPORT = armv6 ? "GCC_THUMB_SUPPORT = NO;" : "";
@@ -312,21 +309,20 @@ class IOSPlatform extends PlatformTarget
 		context.ARMV7 = armv7;
 		context.ARMV7S = armv7s;
 		context.ARM64 = arm64;
-		context.I386 = i386;
 		context.TARGET_DEVICES = switch (project.config.getString("ios.device", "universal"))
 		{
 			case "iphone": "1";
 			case "ipad": "2";
 			default: "1,2";
 		}
-		context.DEPLOYMENT = project.config.getString("ios.deployment", "13.6");
+		context.DEPLOYMENT = project.config.getString("ios.deployment", "9.0");
 
 		if (project.config.getString("ios.compiler") == "llvm" || project.config.getString("ios.compiler", "clang") == "clang")
 		{
 			context.OBJC_ARC = true;
 		}
 
-		// context.ENABLE_BITCODE = (project.config.getFloat ("ios.deployment", 13) >= 6);
+		// context.ENABLE_BITCODE = (project.config.getFloat ("ios.deployment", 9) >= 6);
 		context.ENABLE_BITCODE = project.config.getBool("ios.enable-bitcode", false);
 		context.IOS_COMPILER = project.config.getString("ios.compiler", "clang");
 		context.CPP_BUILD_LIBRARY = project.config.getString("cpp.buildLibrary", "hxcpp");
@@ -349,7 +345,7 @@ class IOSPlatform extends PlatformTarget
 		}
 
 		context.IOS_LINKER_FLAGS = ["-stdlib=libc++"].concat(project.config.getArrayString("ios.linker-flags"));
-		context.IOS_NON_EXEMPT_ENCRYPTION = project.config.getBool("ios.non-exempt-encryption", false);
+		context.IOS_NON_EXEMPT_ENCRYPTION = project.config.getBool("ios.non-exempt-encryption", true);
 
 		switch (project.window.orientation)
 		{
@@ -460,12 +456,7 @@ class IOSPlatform extends PlatformTarget
 	{
 		var path = targetDirectory + "/" + project.app.file + "/haxe/Build.hxml";
 
-		// try to use the existing .hxml file. however, if the project file was
-		// modified more recently than the .hxml, then the .hxml cannot be
-		// considered valid anymore. it may cause errors in editors like vscode.
-		if (FileSystem.exists(path)
-			&& (project.projectFilePath == null || !FileSystem.exists(project.projectFilePath)
-				|| (FileSystem.stat(path).mtime.getTime() > FileSystem.stat(project.projectFilePath).mtime.getTime())))
+		if (FileSystem.exists(path))
 		{
 			return File.getContent(path);
 		}
@@ -484,11 +475,12 @@ class IOSPlatform extends PlatformTarget
 	public override function rebuild():Void
 	{
 		var armv6 = (project.architectures.indexOf(Architecture.ARMV6) > -1 && !project.targetFlags.exists("simulator"));
-		var armv7 = (project.architectures.indexOf(Architecture.ARMV7) > -1 && !project.targetFlags.exists("simulator"));
+		var armv7 = (command == "rebuild"
+			|| (project.architectures.indexOf(Architecture.ARMV7) > -1 && !project.targetFlags.exists("simulator")));
 		var armv7s = (project.architectures.indexOf(Architecture.ARMV7S) > -1 && !project.targetFlags.exists("simulator"));
 		var arm64 = (command == "rebuild"
 			|| (project.architectures.indexOf(Architecture.ARM64) > -1 && !project.targetFlags.exists("simulator")));
-		var i386 = (project.architectures.indexOf(Architecture.X86) > -1 && project.targetFlags.exists("simulator"));
+		var i386 = (command == "rebuild" || project.targetFlags.exists("simulator"));
 		var x86_64 = (command == "rebuild" || project.targetFlags.exists("simulator"));
 
 		var arc = (project.targetFlags.exists("arc"));
@@ -808,8 +800,6 @@ class IOSPlatform extends PlatformTarget
 
 			if (arch == "arm64" && !context.ARM64) continue;
 
-			if (arch == "i386" && !context.I386) continue;
-
 			var libExt = [
 				".iphoneos.a",
 				".iphoneos-v7.a",
@@ -862,7 +852,7 @@ class IOSPlatform extends PlatformTarget
 						fileName = "lib" + fileName;
 					}
 
-					copyIfNewer(dependency.path, projectDirectory + "/lib/" + arch + "/" + fileName);
+					System.copyIfNewer(dependency.path, projectDirectory + "/lib/" + arch + "/" + fileName);
 				}
 			}
 		}

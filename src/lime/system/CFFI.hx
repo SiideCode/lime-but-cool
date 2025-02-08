@@ -155,20 +155,15 @@ class CFFI
 
 			if (result == null)
 			{
-				var ndllFolder = __findNDLLFolder();
+				var haxelib = __findHaxelib("lime");
 
-				if (ndllFolder != "")
+				if (haxelib != "")
 				{
-					result = __tryLoad(ndllFolder + __sysName() + "/" + library, library, method, args);
+					result = __tryLoad(haxelib + "/ndll/" + __sysName() + "/" + library, library, method, args);
 
 					if (result == null)
 					{
-						result = __tryLoad(ndllFolder + __sysName() + "64/" + library, library, method, args);
-					}
-
-					if (result == null)
-					{
-						result = __tryLoad(ndllFolder + __sysName() + "Arm64/" + library, library, method, args);
+						result = __tryLoad(haxelib + "/ndll/" + __sysName() + "64/" + library, library, method, args);
 					}
 				}
 			}
@@ -209,36 +204,39 @@ class CFFI
 		#end
 	}
 
-	@:dox(hide) #if !hl inline #end public static function stringValue(#if hl value:hl.Bytes #else value:String #end):String
-	{
-		#if hl
-		return value != null ? @:privateAccess String.fromUTF8(value) : null;
-		#else
-		return value;
-		#end
-	}
-
-	private static function __findNDLLFolder():String
+	private static function __findHaxelib(library:String):String
 	{
 		#if (sys && !macro && !html5)
-		var process = new Process("haxelib", ["path", "lime"]);
-
 		try
 		{
-			while (true)
-			{
-				var line = StringTools.trim(process.stdout.readLine());
+			var proc = new Process("haxelib", ["path", library]);
 
-				if (StringTools.startsWith(line, "-L "))
+			if (proc != null)
+			{
+				var stream = proc.stdout;
+
+				try
 				{
-					process.close();
-					return Path.addTrailingSlash(line.substr(3));
+					while (true)
+					{
+						var s = stream.readLine();
+
+						if (s.substr(0, 1) != "-")
+						{
+							stream.close();
+							proc.close();
+							__loaderTrace("Found haxelib " + s);
+							return s;
+						}
+					}
 				}
+				catch (e:Dynamic) {}
+
+				stream.close();
+				proc.close();
 			}
 		}
 		catch (e:Dynamic) {}
-
-		process.close();
 		#end
 
 		return "";
@@ -310,7 +308,7 @@ class CFFI
 			}
 			else if (!lazy)
 			{
-				var ndllFolder = __findNDLLFolder() + __sysName();
+				var ndllFolder = __findHaxelib("lime") + "/ndll/" + __sysName();
 				throw "Could not find lime.ndll. This file is provided with Lime's Haxelib releases, but not via Git. "
 					+ "Please copy it from Lime's latest Haxelib release into either "
 					+ ndllFolder + " or " + ndllFolder + "64, as appropriate for your system. "

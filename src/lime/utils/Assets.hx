@@ -519,11 +519,6 @@ class Assets
 
 	public static function unloadLibrary(name:String):Void
 	{
-		removeLibrary(name, true);
-	}
-
-	public static function removeLibrary(name:String, unload:Bool = true):Void
-	{
 		#if (tools && !display)
 		if (name == null || name == "")
 		{
@@ -536,10 +531,7 @@ class Assets
 		{
 			cache.clear(name + ":");
 			library.onChange.remove(library_onChange);
-			if (unload)
-			{
-				library.unload();
-			}
+			library.unload();
 		}
 
 		libraries.remove(name);

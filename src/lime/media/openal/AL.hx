@@ -2,7 +2,6 @@ package lime.media.openal;
 
 #if (!lime_doc_gen || lime_openal)
 import lime._internal.backend.native.NativeCFFI;
-import lime.system.CFFI;
 import lime.system.CFFIPointer;
 import lime.utils.ArrayBufferView;
 
@@ -999,7 +998,10 @@ class AL
 	{
 		#if (lime_cffi && lime_openal && !macro)
 		var result = NativeCFFI.lime_al_get_string(param);
-		return CFFI.stringValue(result);
+		#if hl
+		var result = @:privateAccess String.fromUTF8(result);
+		#end
+		return result;
 		#else
 		return null;
 		#end

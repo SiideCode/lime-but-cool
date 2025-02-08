@@ -3,13 +3,11 @@ package org.haxe.lime;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -17,7 +15,6 @@ import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.MimeTypeMap;
-import android.Manifest;
 import org.haxe.extension.Extension;
 import org.libsdl.app.SDLActivity;
 
@@ -32,9 +29,9 @@ public class GameActivity extends SDLActivity {
 	private static AssetManager assetManager;
 	private static List<Extension> extensions;
 	private static DisplayMetrics metrics;
-	private static Vibrator vibrator;
 
 	public Handler handler;
+
 
 	public static double getDisplayXDPI () {
 
@@ -112,13 +109,6 @@ public class GameActivity extends SDLActivity {
 		super.onCreate (state);
 
 		assetManager = getAssets ();
-
-		if (checkSelfPermission(Manifest.permission.VIBRATE) == PackageManager.PERMISSION_GRANTED) {
-
-			vibrator = (Vibrator)mSingleton.getSystemService (Context.VIBRATOR_SERVICE);
-
-		}
-
 		handler = new Handler ();
 
 		Extension.assetManager = assetManager;
@@ -185,12 +175,6 @@ public class GameActivity extends SDLActivity {
 
 
 	@Override protected void onPause () {
-
-		if (vibrator != null) {
-
-			vibrator.cancel ();
-
-		}
 
 		super.onPause ();
 
@@ -386,47 +370,25 @@ public class GameActivity extends SDLActivity {
 
 	public static void vibrate (int period, int duration) {
 
-		if (vibrator == null || !vibrator.hasVibrator () || period < 0 || duration <= 0) {
-
-			return;
-
-		}
+		Vibrator v = (Vibrator)mSingleton.getSystemService (Context.VIBRATOR_SERVICE);
 
 		if (period == 0) {
 
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-
-				vibrator.vibrate (VibrationEffect.createOneShot (duration, VibrationEffect.DEFAULT_AMPLITUDE));
-
-			} else {
-
-				vibrator.vibrate (duration);
-
-			}
+			v.vibrate (duration);
 
 		} else {
 
-			// each period has two halves (vibrator off/vibrator on), and each half requires a separate entry in the array
-			int periodMS = (int)Math.ceil (period / 2.0);
-			int count = (int)Math.ceil (duration / (double) periodMS);
+			int periodMS = (int)Math.ceil (period / 2);
+			int count = (int)Math.ceil ((duration / period) * 2);
 			long[] pattern = new long[count];
 
-			// the first entry is the delay before vibration starts, so leave it as 0
-			for (int i = 1; i < count; i++) {
+			for (int i = 0; i < count; i++) {
 
 				pattern[i] = periodMS;
 
 			}
 
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-
-				vibrator.vibrate (VibrationEffect.createWaveform (pattern, -1));
-
-			} else {
-
-				vibrator.vibrate (pattern, -1);
-
-			}
+			v.vibrate (pattern, -1);
 
 		}
 

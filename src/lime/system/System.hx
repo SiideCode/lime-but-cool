@@ -25,9 +25,6 @@ import js.Browser;
 import sys.io.Process;
 #end
 
-/**
-	Access operating system level settings and operations.
-**/
 #if !lime_debug
 @:fileXml('tags="haxe,release"')
 @:noDebug
@@ -35,9 +32,9 @@ import sys.io.Process;
 @:access(lime._internal.backend.native.NativeCFFI)
 @:access(lime.system.Display)
 @:access(lime.system.DisplayMode)
-#if (cpp && windows && !lime_disable_gpu_hint)
+#if (cpp && windows && !HXCPP_MINGW && !lime_disable_gpu_hint)
 @:cppFileCode('
-#if defined(HX_WINDOWS) && !defined(__MINGW32__)
+#if defined(HX_WINDOWS)
 extern "C" {
 	_declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
 	_declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
@@ -47,68 +44,21 @@ extern "C" {
 #end
 class System
 {
-	/**
-		Determines if the screen saver is allowed to start or not.
-	**/
 	public static var allowScreenTimeout(get, set):Bool;
-
-	/**
-		The path to the directory where the application is installed, along with
-		its supporting files. In many cases, this directory is read-only, and
-		attempts to write to files, create new files, or delete files in this
-		directory are likely fail.
-	**/
 	public static var applicationDirectory(get, never):String;
-
-	/**
-		The application's dedicated storage directory, which unique to each
-		application and user. Useful for storing settings on a user-specific
-		and application-specific basis.
-
-		This directory may or may not be removed when the application is
-		uninstalled, and it depends on the platform and installer technology
-		that is used.
-	**/
 	public static var applicationStorageDirectory(get, never):String;
-
-	/**
-		The path to the directory containing the user's desktop.
-	**/
 	public static var desktopDirectory(get, never):String;
-
 	public static var deviceModel(get, never):String;
 	public static var deviceVendor(get, never):String;
 	public static var disableCFFI:Bool;
-
-	/**
-		The path to the directory containing the user's documents.
-	**/
 	public static var documentsDirectory(get, never):String;
-
-	/**
-		The platform's default endianness for bytes.
-	**/
 	public static var endianness(get, never):Endian;
-
-	/**
-		The path to the directory where fonts are installed.
-	**/
 	public static var fontsDirectory(get, never):String;
-
-	/**
-		The number of available video displays.
-	**/
 	public static var numDisplays(get, never):Int;
-
 	public static var platformLabel(get, never):String;
 	public static var platformName(get, never):String;
 	public static var platformVersion(get, never):String;
-
-	/**
-		The path to the user's home directory.
-	**/
 	public static var userDirectory(get, never):String;
-
 	@:noCompletion private static var __applicationDirectory:String;
 	@:noCompletion private static var __applicationEntryPoint:Map<String, Function>;
 	@:noCompletion private static var __applicationStorageDirectory:String;
@@ -189,21 +139,6 @@ class System
 	#end
 
 	#if (!lime_doc_gen || sys)
-	/**
-		Attempts to exit the application. Dispatches `onExit`, and will not
-		exit if the event is canceled. When exiting using this method, Lime will
-		gracefully shut down a number of subsystems, including (but not limited
-		to) audio, graphics, timers, and game controllers.
-
-		To properly exit a Lime application, it's best to call Lime's
-		`System.exit()` instead of calling Haxe's built-in `Sys.exit()`. When
-		targeting native platforms especially, Lime's is built on C++ libraries
-		that expose functions to clean up resources properly on exit. Haxe's
-		`Sys.exit()` exits immediately without giving Lime a chance to clean
-		things up. With that in mind, the proper and correct way to exit a Lime
-		app is by calling `lime.system.System.exit()`, and to avoid using
-		`Sys.exit()`.
-	**/
 	public static function exit(code:Int):Void
 	{
 		var currentApp = Application.current;
@@ -232,9 +167,6 @@ class System
 	}
 	#end
 
-	/**
-		Returns information about the video display with the specified ID.
-	**/
 	public static function getDisplay(id:Int):Display
 	{
 		#if (lime_cffi && !macro)
@@ -244,7 +176,11 @@ class System
 		{
 			var display = new Display();
 			display.id = id;
-			display.name = CFFI.stringValue(displayInfo.name);
+			#if hl
+			display.name = @:privateAccess String.fromUTF8(displayInfo.name);
+			#else
+			display.name = displayInfo.name;
+			#end
 			display.bounds = new Rectangle(displayInfo.bounds.x, displayInfo.bounds.y, displayInfo.bounds.width, displayInfo.bounds.height);
 
 			#if ios
@@ -329,9 +265,6 @@ class System
 		return null;
 	}
 
-	/**
-		The number of milliseconds since the application was initialized.
-	**/
 	public static function getTimer():Int
 	{
 		#if flash
@@ -360,11 +293,6 @@ class System
 	}
 	#end
 
-	/**
-		Opens a file with the system default application.
-
-		In a web browser, opens a URL with target `_blank`.
-	**/
 	public static function openFile(path:String):Void
 	{
 		if (path != null)
@@ -384,9 +312,6 @@ class System
 		}
 	}
 
-	/**
-		Opens a URL with the specified target web browser window.
-	**/
 	public static function openURL(url:String, target:String = "_blank"):Void
 	{
 		if (url != null)
@@ -439,11 +364,19 @@ class System
 					}
 				}
 
-				path = CFFI.stringValue(NativeCFFI.lime_system_get_directory(type, company, file));
+				#if hl
+				path = @:privateAccess String.fromUTF8(NativeCFFI.lime_system_get_directory(type, company, file));
+				#else
+				path = NativeCFFI.lime_system_get_directory(type, company, file);
+				#end
 			}
 			else
 			{
-				path = CFFI.stringValue(NativeCFFI.lime_system_get_directory(type, null, null));
+				#if hl
+				path = @:privateAccess String.fromUTF8(NativeCFFI.lime_system_get_directory(type, null, null));
+				#else
+				path = NativeCFFI.lime_system_get_directory(type, null, null);
+				#end
 			}
 
 			#if windows
@@ -655,7 +588,11 @@ class System
 		if (__deviceModel == null)
 		{
 			#if (lime_cffi && !macro && (windows || ios || tvos))
-			__deviceModel = CFFI.stringValue(NativeCFFI.lime_system_get_device_model());
+			#if hl
+			__deviceModel = @:privateAccess String.fromUTF8(NativeCFFI.lime_system_get_device_model());
+			#else
+			__deviceModel = NativeCFFI.lime_system_get_device_model();
+			#end
 			#elseif android
 			var manufacturer:String = JNI.createStaticField("android/os/Build", "MANUFACTURER", "Ljava/lang/String;").get();
 			var model:String = JNI.createStaticField("android/os/Build", "MODEL", "Ljava/lang/String;").get();
@@ -686,7 +623,11 @@ class System
 		if (__deviceVendor == null)
 		{
 			#if (lime_cffi && !macro && windows && !html5)
-			__deviceVendor = CFFI.stringValue(NativeCFFI.lime_system_get_device_vendor());
+			#if hl
+			__deviceVendor = @:privateAccess String.fromUTF8(NativeCFFI.lime_system_get_device_vendor());
+			#else
+			__deviceVendor = NativeCFFI.lime_system_get_device_vendor();
+			#end
 			#elseif android
 			var vendor:String = JNI.createStaticField("android/os/Build", "MANUFACTURER", "Ljava/lang/String;").get();
 			if (vendor != null)
@@ -768,7 +709,11 @@ class System
 		if (__platformLabel == null)
 		{
 			#if (lime_cffi && !macro && windows && !html5)
-			var label:String = CFFI.stringValue(NativeCFFI.lime_system_get_platform_label());
+			#if hl
+			var label:String = @:privateAccess String.fromUTF8(NativeCFFI.lime_system_get_platform_label());
+			#else
+			var label:String = NativeCFFI.lime_system_get_platform_label();
+			#end
 			if (label != null) __platformLabel = StringTools.trim(label);
 			#elseif linux
 			__platformLabel = __runProcess("lsb_release", ["-ds"]);
@@ -824,7 +769,11 @@ class System
 		if (__platformVersion == null)
 		{
 			#if (lime_cffi && !macro && windows && !html5)
-			__platformVersion = CFFI.stringValue(NativeCFFI.lime_system_get_platform_version());
+			#if hl
+			__platformVersion = @:privateAccess String.fromUTF8(NativeCFFI.lime_system_get_platform_version());
+			#else
+			__platformVersion = NativeCFFI.lime_system_get_platform_version();
+			#end
 			#elseif android
 			var release = JNI.createStaticField("android/os/Build$VERSION", "RELEASE", "Ljava/lang/String;").get();
 			var api = JNI.createStaticField("android/os/Build$VERSION", "SDK_INT", "I").get();

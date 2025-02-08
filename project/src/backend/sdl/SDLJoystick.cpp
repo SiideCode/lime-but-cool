@@ -117,4 +117,11 @@ namespace lime {
 	}
 
 
+	int Joystick::GetNumTrackballs (int id) {
+
+		return SDL_JoystickNumBalls (joysticks[id]);
+
+	}
+
+
 }

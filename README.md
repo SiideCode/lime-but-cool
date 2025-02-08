@@ -39,12 +39,7 @@ Lime is free, open-source software under the [MIT license](LICENSE.md).
 Installation
 ============
 
-First, install the latest version of [Haxe](http://www.haxe.org/download).
-
-Then, install Lime from Haxelib and run Lime's setup command.
-
-    haxelib install lime
-    haxelib run lime setup
+First install the latest version of [Haxe](http://www.haxe.org/download).
 
 
 Development Builds
@@ -60,24 +55,36 @@ To install a development build, use the "haxelib local" command:
 Building from Source
 ====================
 
-1. Clone the Lime repository, as well as the submodules:
+Clone the Lime repository, as well as the submodules:
 
-        haxelib git lime https://github.com/openfl/lime
+    git clone --recursive https://github.com/openfl/lime
 
-2. Install required dependencies:
+Tell haxelib where your development copy of Lime is installed:
 
-        haxelib install format
-        haxelib install hxp
+    haxelib dev lime lime
 
-3. Copy the ndll directory from the latest [Haxelib release](https://lib.haxe.org/p/lime/), or see [project/README.md](project/README.md) for details about building native binaries.
+The first time you run the "lime" command, it will attempt to build the Lime standard binary for your desktop platform as the command-line tools. To build these manually, use the following command (using "mac" or "linux" if appropriate):
 
-4. After any changes to the [tools](tools) or [lime/tools](src/lime/tools) directories, rebuild from source:
+    haxelib install format
+    haxelib install hxp
+    lime rebuild windows
 
-        lime rebuild tools
+You can build additional binaries, or rebuild binaries after making changes, using "lime rebuild":
 
-5. To switch away from a source build:
+    lime rebuild windows
+    lime rebuild linux -64 -release -clean
 
-        haxelib set lime [version number]
+You can also rebuild the tools if you make changes to them:
+
+    lime rebuild tools
+
+On a Windows machine, you should have Microsoft Visual Studio C++ (Express is just fine) installed. You will need Xcode on a Mac. To build on a Linux machine, you may need the following packages (or similar):
+
+    sudo apt-get install libgl1-mesa-dev libglu1-mesa-dev g++ g++-multilib gcc-multilib libasound2-dev libx11-dev libxext-dev libxi-dev libxrandr-dev libxinerama-dev
+
+To switch away from a source build, use:
+
+    haxelib dev lime
 
 
 Sample

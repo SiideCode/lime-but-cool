@@ -60,7 +60,6 @@ class HXProject extends Script
 	public var templatePaths:Array<String>;
 	@:isVar public var window(get, set):WindowData;
 	public var windows:Array<WindowData>;
-	public var projectFilePath:String;
 
 	private var needRerun:Bool;
 
@@ -87,7 +86,7 @@ class HXProject extends Script
 		var outputFile = args[1];
 
 		HXProject._command = inputData.command;
-		HXProject._target = inputData.target;
+		HXProject._target = cast inputData.target;
 		HXProject._debug = inputData.debug;
 		HXProject._targetFlags = inputData.targetFlags;
 		HXProject._templatePaths = inputData.templatePaths;
@@ -102,14 +101,9 @@ class HXProject extends Script
 
 		Haxelib.debug = inputData.haxelibDebug;
 
-		initializeStatics();
+		initialize();
 
 		var classRef = Type.resolveClass(inputData.name);
-		if (classRef == null)
-		{
-			Log.error('Unable to find class ${ inputData.name } in ${ inputData.projectFile }');
-			return;
-		}
 		var instance = Type.createInstance(classRef, []);
 
 		var serializer = new Serializer();
@@ -119,11 +113,11 @@ class HXProject extends Script
 		File.saveContent(outputFile, serializer.toString());
 	}
 
-	public function new(defines:Map<String, Dynamic> = null)
+	public function new()
 	{
 		super();
 
-		initializeStatics();
+		initialize();
 
 		command = _command;
 		config = new ConfigData();
@@ -164,17 +158,13 @@ class HXProject extends Script
 		windows = [window];
 		assets = new Array<Asset>();
 
-		if (defines != null)
+		if (_userDefines != null)
 		{
-			this.defines = MapTools.copy(defines);
-		}
-		else if (_userDefines != null)
-		{
-			this.defines = MapTools.copy(_userDefines);
+			defines = MapTools.copy(_userDefines);
 		}
 		else
 		{
-			this.defines = new Map<String, String>();
+			defines = new Map<String, String>();
 		}
 
 		dependencies = new Array<Dependency>();
@@ -186,10 +176,6 @@ class HXProject extends Script
 		else
 		{
 			environment = Sys.environment();
-			for (conflict in ["air", "android", "cpp", "flash", "hl", "html5", "ios", "linux", "mac", "neko", "webassembly", "windows"])
-			{
-				environment.remove(conflict);
-			}
 		}
 
 		haxedefs = new Map<String, Dynamic>();
@@ -208,8 +194,6 @@ class HXProject extends Script
 		samplePaths = new Array<String>();
 		splashScreens = new Array<SplashScreen>();
 		targetHandlers = new Map<String, String>();
-
-		initializeDefines();
 	}
 
 	public function clone():HXProject
@@ -385,9 +369,9 @@ class HXProject extends Script
 
 		var path = FileSystem.fullPath(Path.withoutDirectory(projectFile));
 		var name = Path.withoutDirectory(Path.withoutExtension(projectFile));
-		name = name.charAt(0).toUpperCase() + name.substr(1);
+		name = name.substr(0, 1).toUpperCase() + name.substr(1);
 
-		var tempDirectory = FileSystem.fullPath(System.getTemporaryDirectory());
+		var tempDirectory = System.getTemporaryDirectory();
 		var classFile = Path.combine(tempDirectory, name + ".hx");
 
 		System.copyFile(path, classFile);
@@ -432,7 +416,6 @@ class HXProject extends Script
 				name: name,
 				target: HXProject._target,
 				debug: HXProject._debug,
-				projectFile: projectFile,
 				targetFlags: HXProject._targetFlags,
 				templatePaths: HXProject._templatePaths,
 				userDefines: HXProject._userDefines,
@@ -448,7 +431,7 @@ class HXProject extends Script
 		try
 		{
 			#if (lime && !eval)
-			var nekoOutput = Path.combine(tempDirectory, name + ".n");
+			var nekoOutput = FileSystem.fullPath(Path.combine(tempDirectory, name + ".n"));
 			System.runCommand("", "haxe", args.concat(["--main", "lime.tools.HXProject", "-neko", nekoOutput]));
 			System.runCommand("", "neko", [nekoOutput, inputFile, outputFile]);
 			#else
@@ -457,7 +440,6 @@ class HXProject extends Script
 		}
 		catch (e:Dynamic)
 		{
-			Log.error(Std.string(e));
 			FileSystem.deleteFile(inputFile);
 			Sys.exit(1);
 		}
@@ -674,185 +656,15 @@ class HXProject extends Script
 		@:privateAccess projectXML.parseXML(new Access(Xml.parse(xml).firstElement()), "");
 		merge(projectXML);
 	}
+
 	// #end
-
-	private function initializeDefines():Void
-	{
-		switch (platformType)
-		{
-			case MOBILE:
-				defines.set("platformType", "mobile");
-				defines.set("mobile", "1");
-
-			case DESKTOP:
-				defines.set("platformType", "desktop");
-				defines.set("desktop", "1");
-
-			case WEB:
-				defines.set("platformType", "web");
-				defines.set("web", "1");
-
-			case CONSOLE:
-				defines.set("platformType", "console");
-				defines.set("console", "1");
-		}
-
-		if (targetFlags.exists("neko"))
-		{
-			defines.set("targetType", "neko");
-			defines.set("native", "1");
-			defines.set("neko", "1");
-		}
-		else if (targetFlags.exists("hl"))
-		{
-			defines.set("targetType", "hl");
-			defines.set("native", "1");
-			defines.set("hl", "1");
-			if (targetFlags.exists("hlc"))
-			{
-				defines.set("hlc", "1");
-			}
-		}
-		else if (targetFlags.exists("java"))
-		{
-			defines.set("targetType", "java");
-			defines.set("native", "1");
-			defines.set("java", "1");
-		}
-		else if (targetFlags.exists("nodejs"))
-		{
-			defines.set("targetType", "nodejs");
-			defines.set("native", "1");
-			defines.set("nodejs", "1");
-		}
-		else if (targetFlags.exists("cs"))
-		{
-			defines.set("targetType", "cs");
-			defines.set("native", "1");
-			defines.set("cs", "1");
-		}
-		else if (target == Platform.FIREFOX)
-		{
-			defines.set("targetType", "js");
-			defines.set("html5", "1");
-		}
-		else if (target == Platform.AIR)
-		{
-			defines.set("targetType", "swf");
-			defines.set("flash", "1");
-			if (targetFlags.exists("ios")) defines.set("ios", "1");
-			if (targetFlags.exists("android")) defines.set("android", "1");
-		}
-		else if (target == Platform.WINDOWS && (targetFlags.exists("uwp") || targetFlags.exists("winjs")))
-		{
-			targetFlags.set("uwp", "");
-			targetFlags.set("winjs", "");
-
-			defines.set("targetType", "js");
-			defines.set("html5", "1");
-			defines.set("uwp", "1");
-			defines.set("winjs", "1");
-		}
-		else if (platformType == DESKTOP && target != System.hostPlatform)
-		{
-			defines.set("native", "1");
-
-			if (target == Platform.LINUX && targetFlags.exists("cpp"))
-			{
-				defines.set("targetType", "cpp");
-				defines.set("cpp", "1");
-			}
-			else if (target == Platform.WINDOWS && (targetFlags.exists("cpp") || targetFlags.exists("mingw")))
-			{
-				defines.set("targetType", "cpp");
-				defines.set("cpp", "1");
-				defines.set("mingw", "1");
-			}
-			else
-			{
-				targetFlags.set("neko", "1");
-
-				defines.set("targetType", "neko");
-				defines.set("neko", "1");
-			}
-		}
-		else if (target == Platform.WEB_ASSEMBLY)
-		{
-			defines.set("webassembly", "1");
-			defines.set("wasm", "1");
-			defines.set("emscripten", "1");
-			defines.set("targetType", "cpp");
-			defines.set("native", "1");
-			defines.set("cpp", "1");
-		}
-		else if (targetFlags.exists("cpp")
-			|| ((platformType != PlatformType.WEB) && !targetFlags.exists("html5")))
-		{
-			defines.set("targetType", "cpp");
-			defines.set("native", "1");
-			defines.set("cpp", "1");
-		}
-		else if (target == Platform.FLASH)
-		{
-			defines.set("targetType", "swf");
-		}
-
-		if (debug)
-		{
-			defines.set("buildType", "debug");
-			defines.set("debug", "1");
-		}
-		else if (targetFlags.exists("final"))
-		{
-			defines.set("buildType", "final");
-			defines.set("final", "1");
-		}
-		else
-		{
-			defines.set("buildType", "release");
-			defines.set("release", "1");
-		}
-
-		if (targetFlags.exists("static"))
-		{
-			defines.set("static_link", "1");
-		}
-
-		if (defines.exists("SWF_PLAYER"))
-		{
-			environment.set("SWF_PLAYER", defines.get("SWF_PLAYER"));
-		}
-
-		defines.set(Std.string(target).toLowerCase(), "1");
-		defines.set("target", Std.string(target).toLowerCase());
-		defines.set("platform", defines.get("target"));
-
-		switch (System.hostPlatform)
-		{
-			case WINDOWS:
-				defines.set("host", "windows");
-			case MAC:
-				defines.set("host", "mac");
-			case LINUX:
-				defines.set("host", "linux");
-			default:
-				defines.set("host", "unknown");
-		}
-
-		#if lime
-		defines.set("lime-tools", "1");
-		#end
-
-		defines.set("hxp", "1"); // TODO: Version?
-	}
-
-	private static function initializeStatics():Void
+	private static function initialize():Void
 	{
 		if (!initialized)
 		{
 			if (_target == null)
 			{
-				_target = System.hostPlatform;
+				_target = cast System.hostPlatform;
 			}
 
 			if (_targetFlags == null)
@@ -922,11 +734,6 @@ class HXProject extends Script
 			else
 			{
 				launchStoryboard.merge(project.launchStoryboard);
-			}
-
-			if (projectFilePath == null)
-			{
-				projectFilePath = project.projectFilePath;
 			}
 
 			languages = ArrayTools.concatUnique(languages, project.languages, true);
@@ -1058,7 +865,7 @@ class HXProject extends Script
 	// Getters & Setters
 	private function get_host():Platform
 	{
-		return System.hostPlatform;
+		return cast System.hostPlatform;
 	}
 
 	private function get_templateContext():Dynamic
@@ -1264,10 +1071,17 @@ class HXProject extends Script
 			{
 				var cache = Log.verbose;
 				Log.verbose = Haxelib.debug;
-				var output = Haxelib.runProcess("", ["path", name], true, true, true);
+				var output = "";
+
+				try
+				{
+					output = Haxelib.runProcess("", ["path", name], true, true, true);
+				}
+				catch (e:Dynamic) {}
+
 				Log.verbose = cache;
 
-				var split = output != null ? output.split("\n") : [];
+				var split = output.split("\n");
 				var haxelibName = null;
 
 				for (arg in split)

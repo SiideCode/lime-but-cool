@@ -67,25 +67,21 @@ class SVGExport
 			// }
 
 			case MAC:
-				if (System.hostArchitecture == X64)
-				{
-					untyped $loader.path = $array(path + "Mac64/", $loader.path);
-				}
-				else if (System.hostArchitecture == ARM64)
-				{
-					untyped $loader.path = $array(path + "MacArm64/", $loader.path);
-				}
+				untyped $loader.path = $array(path + "Mac/", $loader.path);
+				untyped $loader.path = $array(path + "Mac64/", $loader.path);
 
 			case LINUX:
 				var arguments = Sys.args();
+				var raspberryPi = false;
 
-				if ( System.hostArchitecture == ARMV7 )
+				for (argument in arguments)
 				{
-					untyped $loader.path = $array(path + "LinuxArm/", $loader.path);
+					if (argument == "-rpi") raspberryPi = true;
 				}
-				else if (System.hostArchitecture == ARM64)
+
+				if (raspberryPi)
 				{
-					untyped $loader.path = $array(path + "LinuxArm64/", $loader.path);
+					untyped $loader.path = $array(path + "RPi/", $loader.path);
 				}
 				else if (System.hostArchitecture == X64)
 				{

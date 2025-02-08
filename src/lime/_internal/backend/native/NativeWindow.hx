@@ -15,7 +15,6 @@ import lime.graphics.OpenGLRenderContext;
 import lime.graphics.RenderContext;
 import lime.math.Rectangle;
 import lime.math.Vector2;
-import lime.system.CFFI;
 import lime.system.Display;
 import lime.system.DisplayMode;
 import lime.system.JNI;
@@ -133,7 +132,11 @@ class NativeWindow
 		var context = new RenderContext();
 		context.window = parent;
 
-		var contextType:String = CFFI.stringValue(NativeCFFI.lime_window_get_context_type(handle));
+		#if hl
+		var contextType = @:privateAccess String.fromUTF8(NativeCFFI.lime_window_get_context_type(handle));
+		#else
+		var contextType:String = NativeCFFI.lime_window_get_context_type(handle);
+		#end
 
 		switch (contextType)
 		{
@@ -182,13 +185,6 @@ class NativeWindow
 
 		setFrameRate(Reflect.hasField(attributes, "frameRate") ? attributes.frameRate : 60);
 		#end
-
-		// SDL 2 enables text input events by default, but we want them only
-		// when requested. otherwise, we might get weird behavior like IME
-		// candidate windows appearing unexpectedly when holding down a key.
-		// See, for example: openfl/openfl#2697
-		// it appears that SDL 3 may behave differently, if we ever upgrade.
-		setTextInputEnabled(false);
 	}
 
 	public function alert(message:String, title:String):Void
