@@ -519,7 +519,7 @@ namespace lime
 				if (!SDLJoystick::IsAccelerometer(event->jball.which))
 				{
 
-					joystickEvent.type = JOYSTICK_TRACKBALL_MOVE;
+					joystickEvent.type = JOYSTICK_AXIS_MOVE;
 					joystickEvent.index = event->jball.ball;
 					joystickEvent.x = event->jball.xrel / (event->jball.xrel > 0 ? 32767.0 : 32768.0);
 					joystickEvent.y = event->jball.yrel / (event->jball.yrel > 0 ? 32767.0 : 32768.0);
